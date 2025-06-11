@@ -68,7 +68,7 @@ Welcome to the starting line of your next AWS CDK project. This repository is cr
 - 🤖 Automated Deploy Pipelines: Embrace CI/CD with out-of-the-box GitHub Actions workflows, automating your deployment processes for efficiency and reliability.
 - 🏗️ Project structure: The [project is structured](#project-structure) in a clean and intuitive way that allows you to easily manage your constructs and stacks for this CDK App.
 - 🛡️ Seamless Security: Leverage OpenID Connect for secure AWS deployments. Authenticate your GitHub Actions workflows directly with AWS, eliminating the need for stored credentials or long-lived secrets.
-- 📦 Improved Dependency Management: Dependencies and virtualenvs are managed with Poetry.
+- 📦 Improved Dependency Management: Dependencies are managed with pip and requirements.txt.
 - 📏 Fast Linting & formatting: Ruff is installed as a dev dependency right out of the box!
 - 🚀 Enhanced Pull Requests: Benefit from a built-in, fancy pull request template, making code reviews more structured and informative.
 
@@ -84,7 +84,7 @@ All the config that is needed to personalise the CDK App to your environment is 
 
 3. Install the AWS CDK CLI and projen: `npm install -g aws-cdk projen`
 
-4. Install the projects dependencies using: `poetry install`
+4. Install the projects dependencies using: `pip install -r requirements.txt` and `pip install -r requirements-dev.txt`
 
 5. Customize the AWS Region and Account IDs in the [.projenrc.py](./.projenrc.py) file to match your AWS setup:
 
@@ -133,8 +133,8 @@ Here’s a closer look at how this structure enhances maintainability and scalab
 ```bash
 .
 ├── cdk.json
-├── poetry.lock
-├── pyproject.toml
+├── requirements.txt
+├── requirements-dev.txt
 ├── README.md
 ├── src
 │  ├── __init__.py
