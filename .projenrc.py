@@ -17,8 +17,8 @@ aws_region = os.getenv("AWS_REGION", "us-east-1")
 project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
-    cdk_version="2.197.0",        # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1016.0", # # Find the latest CDK CLI version https://www.npmjs.com/package/aws-cdk
+    cdk_version="2.200.1",        # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_cli_version="2.1018.1", # # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     cdk_version_pinning=True,
     module_name=python_module_name,
     name="aws-cdk-python-starterkit",
@@ -27,7 +27,7 @@ project = AwsCdkPythonApp(
     version="0.1.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.92.6", "ruff"], # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=["projen@0.92.10", "ruff"], # Find the latest projen version here: https://pypi.org/project/projen/
     github_options={
         "pull_request_lint": False,
     },
