@@ -39,17 +39,8 @@ def github_cicd(gh, account, env, python_version):
                         },
                     },
                     {
-                        "name": "Install and configure Poetry",
-                        "uses": "snok/install-poetry@v1",
-                        "with": {
-                            "virtualenvs-create": "true",
-                            "virtualenvs-in-project": "true",
-                            "prefer-active-python": "true",
-                        },
-                    },
-                    {
                         "name": "Install dependencies",
-                        "run": "poetry install",
+                        "run": "pip install -r requirements.txt -r requirements-dev.txt",
                     },
                     {
                         "name": "Install cdk & projen",
