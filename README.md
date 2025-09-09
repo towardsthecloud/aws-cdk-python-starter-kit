@@ -1,10 +1,9 @@
-# [![AWS CDK Python Starterkit header](./icons/github-title-banner.png)](https://towardsthecloud.com)
+# [![AWS CDK Python Starter Kit header](./icons/github-title-banner.png)](https://towardsthecloud.com)
 
-# AWS CDK Python Starterkit
+# AWS CDK Python Starter Kit
 
 > The perfect starter kit to create and deploy an AWS CDK App using Python on your AWS account in less than 5 minutes using GitHub actions!
 
-[![Build Status](https://github.com/towardsthecloud/aws-cdk-starterkit/actions/workflows/build.yml/badge.svg)](https://github.com/towardsthecloud/aws-cdk-starterkit/actions/workflows/build.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ## Intro
@@ -125,7 +124,7 @@ However, as projects evolve to encompass multiple microservices and a variety of
 
 In such cases, adopting a more sophisticated AWS CDK project organization becomes critical. This ensures not only the ease of extensibility but also the smooth deployment of each component, thereby supporting a more robust development lifecycle and facilitating greater operational efficiency.
 
-To cater to these advanced needs, your AWS CDK project should adopt a modular structure. This is where the **AWS CDK Python Starterkit** shines ✨.
+To cater to these advanced needs, your AWS CDK project should adopt a modular structure. This is where the **AWS CDK Python Starter Kit** shines ✨.
 
 Here’s a closer look at how this structure enhances maintainability and scalability:
 
@@ -175,9 +174,9 @@ Here is a brief explanation of what each section does:
 - `src/lib/main.ts`: This is where the CDK app is instantiated.
 - `test`: Is the location to store your unit or integration tests (powered by jest)
 
-## AWS CDK Starterkit for TypeScript Users
+## AWS CDK Starter Kit for TypeScript Users
 
-> **Looking for the TypeScript version of this AWS CDK starter kit?** Check out the [AWS CDK Starterkit](https://github.com/towardsthecloud/aws-cdk-starterkit) for a tailored experience that leverages the full power of AWS CDK with TypeScript.
+> **Looking for the TypeScript version of this AWS CDK Starter Kit?** Check out the [AWS CDK Starter Kit](https://github.com/towardsthecloud/aws-cdk-starter-kit) for a tailored experience that leverages the full power of AWS CDK with TypeScript.
 
 ## Acknowledgements
 

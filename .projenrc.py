@@ -8,7 +8,7 @@ from src.bin.env_helper import cdk_action_task
 
 # Define the python module name and set the python version
 python_module_name = "src"
-python_version = "3.11"
+python_version = "3.13"
 
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
@@ -17,17 +17,16 @@ aws_region = os.getenv("AWS_REGION", "us-east-1")
 project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
-    cdk_version="2.200.1",        # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1018.1", # # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     cdk_version_pinning=True,
+    cdk_version="2.214.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_cli_version="2.1029.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     module_name=python_module_name,
-    name="aws-cdk-python-starterkit",
-    license="Apache-2.0",
+    name="aws-cdk-python-starter-kit",
     description="Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!",
-    version="0.1.0",
+    version="2.100.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.92.10", "ruff"], # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=["projen@0.96.0", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
     github_options={
         "pull_request_lint": False,
     },
@@ -36,34 +35,12 @@ project = AwsCdkPythonApp(
             "__pycache__",
             "__pycache__/",
             ".python-version",
-            "!.eslintrc.js",
-            ".cache",
-            ".coverage.*",
-            ".coverage",
             ".DS_Store",
-            ".env",
             ".mypy_cache",
             ".pytest_cache",
             ".Python",
             ".venv/",
-            ".vscode",
-            "*.js",
-            "*.log",
-            "*.manifest",
             "*.pyc",
-            "*.spec",
-            "*.zip",
-            "**/cdk-test-report.xml",
-            "*node_modules*",
-            "build/",
-            "coverage/",
-            "dist/",
-            "downloads/",
-            "env/",
-            "ENV/",
-            "htmlcov/",
-            "sdist/",
-            "var/",
             "venv/",
         ],
     },
@@ -95,6 +72,6 @@ for env, account in target_accounts.items():
         )
 
         # Adds GitHub action workflows for deploying the CDK stacks to the target AWS account
-        github_cicd(gh, account, env, python_version)  # Python 3.11
+        github_cicd(gh, account, env, python_version)
 
 project.synth()

@@ -20,7 +20,7 @@ jobs:
       - name: Setup python environment
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
