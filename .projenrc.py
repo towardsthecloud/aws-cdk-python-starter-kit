@@ -18,15 +18,15 @@ project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
     cdk_version_pinning=True,
-    cdk_version="2.214.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1029.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
+    cdk_version="2.221.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_cli_version="2.1031.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     module_name=python_module_name,
     name="aws-cdk-python-starter-kit",
     description="Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!",
     version="2.100.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.96.0", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=["projen@0.98.4", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
     github_options={
         "pull_request_lint": False,
     },

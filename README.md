@@ -1,10 +1,8 @@
-# [![AWS CDK Python Starter Kit header](./icons/github-title-banner.png)](https://towardsthecloud.com)
+# [![AWS CDK Python Starter Kit header](./images/github-title-banner.png)](https://towardsthecloud.com)
 
 # AWS CDK Python Starter Kit
 
-> The perfect starter kit to create and deploy an AWS CDK App using Python on your AWS account in less than 5 minutes using GitHub actions!
-
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+The perfect starter kit to create and deploy an AWS CDK App using Python on your AWS account in less than 5 minutes using GitHub actions!
 
 ## Intro
 
@@ -55,16 +53,15 @@ Welcome to the starting line of your next AWS CDK project. This repository is cr
 > </details>
 <!-- TIP-LIST:END -->
 
-## Features
+## 🚀 Features
 
-- ⚡ Rapid Setup: Jumpstart your project within minutes by tweaking a [single configuration file](./.projenrc.py). Spend less time on boilerplate and more on building.
-- 🤹‍♂️ Multi-Account Flexibility: Ready for enterprises, this starter kit supports multi-account setups right from the start, enabling scalable and segregated cloud environments.
-- 🤖 Automated Deploy Pipelines: Embrace CI/CD with out-of-the-box GitHub Actions workflows, automating your deployment processes for efficiency and reliability.
-- 🏗️ Project structure: The [project is structured](#project-structure) in a clean and intuitive way that allows you to easily manage your constructs and stacks for this CDK App.
-- 🛡️ Seamless Security: Leverage OpenID Connect for secure AWS deployments. Authenticate your GitHub Actions workflows directly with AWS, eliminating the need for stored credentials or long-lived secrets.
-- 📦 Improved Dependency Management: Dependencies are managed with pip and requirements.txt.
-- 📏 Fast Linting & formatting: Ruff is installed as a dev dependency right out of the box!
-- 🚀 Enhanced Pull Requests: Benefit from a built-in, fancy pull request template, making code reviews more structured and informative.
+- **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
+  - Preconfigured Python with optimized pip dependency management in [requirements.txt](./requirements.txt)
+  - Pre-configured linting & formatting with [Ruff](https://github.com/astral-sh/ruff) for code quality
+  - Clean [project structure](#project-structure) for easy management of constructs and stacks
+- **🛡️ Seamless Security**: OIDC authentication for keyless AWS deployments - no stored credentials or long-lived secrets required
+- **🤖 Automated CI/CD**: Out-of-the-box GitHub Actions workflows with multi-account support for enterprise-ready deployments
+- **🚀 Enhanced Pull Requests**: Built-in pull request template for structured and informative code reviews
 
 ## Setup Guide
 
@@ -72,7 +69,7 @@ All the config that is needed to personalise the CDK App to your environment is 
 
 **To get started, follow these steps:**
 
-1. Fork / clone this repository.
+1. Click the green ["Use this template"](https://github.com/new?template_name=aws-cdk-python-starter-kit&template_owner=towardsthecloud) button to create a new repository based on this starter kit.
 
 2. Add a Personal Access Token to the repository settings on GitHub, follow these [instructions for setting up a fine-grained personal access token](https://projen.io/docs/integrations/github/#fine-grained-personal-access-token-beta).
 
