@@ -2,11 +2,7 @@
 
 # AWS CDK Python Starter Kit
 
-The perfect starter kit to create and deploy an AWS CDK App using Python on your AWS account in less than 5 minutes using GitHub actions!
-
-## Intro
-
-Welcome to the starting line of your next AWS CDK project. This repository is crafted to supercharge your project's setup with AWS CDK Python, projen, and GitHub actions, ensuring a smooth and efficient deployment to your AWS account.
+Production-ready AWS CDK Python starter kit template with secure OIDC authentication and automated CI/CD. Deploy infrastructure to AWS in minutes with projen-powered configuration.
 
 ## 🚀 Features
 
