@@ -8,6 +8,16 @@ The perfect starter kit to create and deploy an AWS CDK App using Python on your
 
 Welcome to the starting line of your next AWS CDK project. This repository is crafted to supercharge your project's setup with AWS CDK Python, projen, and GitHub actions, ensuring a smooth and efficient deployment to your AWS account.
 
+## 🚀 Features
+
+- **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
+  - Preconfigured Python with optimized pip dependency management in [requirements.txt](./requirements.txt)
+  - Pre-configured linting & formatting with [Ruff](https://github.com/astral-sh/ruff) for code quality
+  - Clean [project structure](#project-structure) for easy management of constructs and stacks
+- **🛡️ Seamless Security**: OIDC authentication for keyless AWS deployments - no stored credentials or long-lived secrets required
+- **🤖 Automated CI/CD**: Out-of-the-box GitHub Actions workflows with multi-account support for enterprise-ready deployments
+- **🚀 Enhanced Pull Requests**: Built-in pull request template for structured and informative code reviews
+
 <!-- TIP-LIST:START -->
 > [!TIP]
 > **Towards the Cloud runs the AWS foundation for modern product teams. This means your team ships faster, slashes AWS spend, and stay audit-ready without having to hire a platform squad.**
@@ -52,16 +62,6 @@ Welcome to the starting line of your next AWS CDK project. This repository is cr
 >
 > </details>
 <!-- TIP-LIST:END -->
-
-## 🚀 Features
-
-- **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
-  - Preconfigured Python with optimized pip dependency management in [requirements.txt](./requirements.txt)
-  - Pre-configured linting & formatting with [Ruff](https://github.com/astral-sh/ruff) for code quality
-  - Clean [project structure](#project-structure) for easy management of constructs and stacks
-- **🛡️ Seamless Security**: OIDC authentication for keyless AWS deployments - no stored credentials or long-lived secrets required
-- **🤖 Automated CI/CD**: Out-of-the-box GitHub Actions workflows with multi-account support for enterprise-ready deployments
-- **🚀 Enhanced Pull Requests**: Built-in pull request template for structured and informative code reviews
 
 ## Setup Guide
 
