@@ -1,7 +1,8 @@
 import os
 
-from projen import github
+from projen import github, YamlFile
 from projen.awscdk import AwsCdkPythonApp
+from projen.github import AutoApprove
 
 from src.bin.cicd_helper import github_cicd
 from src.bin.env_helper import cdk_action_task
@@ -59,6 +60,56 @@ target_accounts = {
 }
 
 gh = github.GitHub(project)
+
+# Add Dependabot configuration for pip
+YamlFile(
+    project,
+    ".github/dependabot.yml",
+    obj={
+        "version": 2,
+        "updates": [
+            {
+                "package-ecosystem": "pip",
+                "directory": "/",
+                "schedule": {"interval": "weekly"},
+                "ignore": [
+                    {"dependency-name": "aws-cdk-lib"},
+                    {"dependency-name": "aws-cdk"},
+                    {"dependency-name": "projen"},
+                ],
+                "labels": ["dependencies", "auto-approve"],
+                "groups": {
+                    "default": {
+                        "patterns": ["*"],
+                        "exclude-patterns": ["aws-cdk*", "projen"],
+                    }
+                },
+            }
+        ],
+    },
+)
+
+# Add auto-approve configuration
+AutoApprove(gh, allowed_usernames=["dependabot", "dependabot[bot]"])
+
+# Add auto-merge step to the auto-approve workflow
+auto_approve_workflow = project.try_find_object_file(".github/workflows/auto-approve.yml")
+if auto_approve_workflow:
+    auto_approve_workflow.add_override("jobs.approve.permissions.contents", "write")
+    # Add checkout step before the merge step
+    auto_approve_workflow.add_override(
+        "jobs.approve.steps.1",
+        {"name": "Checkout", "uses": "actions/checkout@v5"},
+    )
+    auto_approve_workflow.add_override(
+        "jobs.approve.steps.2",
+        {
+            "name": "Enable Pull Request Automerge",
+            "run": 'gh pr merge --merge --auto "${{ github.event.pull_request.number }}"',
+            "env": {"GH_TOKEN": "${{ secrets.PROJEN_GITHUB_TOKEN }}"},
+        },
+    )
+
 # Loop through each environment in target_accounts
 for env, account in target_accounts.items():
     if account:  # Check if account is not None

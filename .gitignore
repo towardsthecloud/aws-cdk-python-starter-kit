@@ -93,6 +93,8 @@ cython_debug/
 /cdk.out/
 .cdk.staging/
 !/.github/workflows/pull-request-lint.yml
+!/.github/dependabot.yml
+!/.github/workflows/auto-approve.yml
 !/.github/workflows/cdk-deploy-dev.yml
 !/.github/workflows/cdk-deploy-test.yml
 !/.projenrc.py
