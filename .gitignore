@@ -11,6 +11,8 @@ node_modules/
 !/.projen/tasks.json
 !/.projen/deps.json
 !/.projen/files.json
+!/.github/workflows/pull-request-lint.yml
+!/.github/workflows/auto-approve.yml
 /.env
 !/requirements.txt
 !/requirements-dev.txt
@@ -92,9 +94,7 @@ cython_debug/
 !/cdk.json
 /cdk.out/
 .cdk.staging/
-!/.github/workflows/pull-request-lint.yml
 !/.github/dependabot.yml
-!/.github/workflows/auto-approve.yml
 !/.github/workflows/cdk-deploy-dev.yml
 !/.github/workflows/cdk-deploy-test.yml
 !/.projenrc.py

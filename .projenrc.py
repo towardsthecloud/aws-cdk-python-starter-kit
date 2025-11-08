@@ -1,8 +1,7 @@
 import os
 
-from projen import github, YamlFile
+from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
-from projen.github import AutoApprove
 
 from src.bin.cicd_helper import github_cicd
 from src.bin.env_helper import cdk_action_task
@@ -29,7 +28,14 @@ project = AwsCdkPythonApp(
     deps=["aws-cdk-github-oidc"],
     dev_deps=["projen@0.98.4", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
     github_options={
-        "pull_request_lint": False,
+        "pull_request_lint_options": {
+            "semantic_title_options": {
+                "types": ["feat", "fix", "chore", "refactor", "perf", "docs", "style", "test", "build", "ci"],
+            },
+        },
+    },
+    auto_approve_options={
+        "allowed_usernames": ["dependabot", "dependabot[bot]"],
     },
     git_ignore_options={
         "ignore_patterns": [
@@ -59,7 +65,7 @@ target_accounts = {
     "production": None,
 }
 
-gh = github.GitHub(project)
+gh = project.github
 
 # Add Dependabot configuration for pip
 YamlFile(
@@ -88,9 +94,6 @@ YamlFile(
         ],
     },
 )
-
-# Add auto-approve configuration
-AutoApprove(gh, allowed_usernames=["dependabot", "dependabot[bot]"])
 
 # Add auto-merge step to the auto-approve workflow
 auto_approve_workflow = project.try_find_object_file(".github/workflows/auto-approve.yml")
