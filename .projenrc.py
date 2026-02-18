@@ -1,5 +1,10 @@
 import os
 
+# Avoid re-running uv's environment bootstrap during synth if the venv already exists.
+# `uv venv` errors when the target directory is already present.
+if os.path.isdir(".venv"):
+    os.environ["PROJEN_DISABLE_POST"] = "true"
+
 from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
@@ -7,8 +12,11 @@ from src.bin.cicd_helper import github_cicd
 from src.bin.env_helper import cdk_action_task
 
 # Define the python module name and set the python version
+project_name = "aws-cdk-python-starter-kit"
 python_module_name = "src"
 python_version = "3.13"
+python_major, python_minor = map(int, python_version.split("."))
+python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
 
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
@@ -21,12 +29,21 @@ project = AwsCdkPythonApp(
     cdk_version="2.221.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
     cdk_cli_version="2.1031.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     module_name=python_module_name,
-    name="aws-cdk-python-starter-kit",
+    name=project_name,
+    projen_command="uv run projen",
     description="Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!",
     version="2.100.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.98.4", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=["projen@0.99.12", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    uv=True,
+    uv_options={
+        "python_exec": f"python{python_version}",
+        "project": {
+            "name": project_name,
+            "requires_python": python_requires,
+        },
+    },
     github_options={
         "pull_request_lint_options": {
             "semantic_title_options": {
@@ -67,7 +84,7 @@ target_accounts = {
 
 gh = project.github
 
-# Add Dependabot configuration for pip
+# Add Dependabot configuration for uv
 YamlFile(
     project,
     ".github/dependabot.yml",
@@ -75,7 +92,7 @@ YamlFile(
         "version": 2,
         "updates": [
             {
-                "package-ecosystem": "pip",
+                "package-ecosystem": "uv",
                 "directory": "/",
                 "schedule": {"interval": "weekly"},
                 "ignore": [
@@ -126,6 +143,6 @@ for env, account in target_accounts.items():
         )
 
         # Adds GitHub action workflows for deploying the CDK stacks to the target AWS account
-        github_cicd(gh, account, env, python_version)
+        github_cicd(gh, account, env, python_version, aws_region)
 
 project.synth()
