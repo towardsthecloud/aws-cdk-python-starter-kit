@@ -7,7 +7,7 @@ Production-ready AWS CDK Python starter kit template with secure OIDC authentica
 ## 🚀 Features
 
 - **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
-  - Preconfigured Python with optimized pip dependency management in [requirements.txt](./requirements.txt)
+  - Preconfigured Python with uv dependency management via [pyproject.toml](./pyproject.toml)
   - Pre-configured linting & formatting with [Ruff](https://github.com/astral-sh/ruff) for code quality
   - Clean [project structure](#project-structure) for easy management of constructs and stacks
 - **🛡️ Seamless Security**: OIDC authentication for keyless AWS deployments - no stored credentials or long-lived secrets required
@@ -53,9 +53,9 @@ All the config that is needed to personalise the CDK App to your environment is 
 
 2. Add a Personal Access Token to the repository settings on GitHub, follow these [instructions for setting up a fine-grained personal access token](https://projen.io/docs/integrations/github/#fine-grained-personal-access-token-beta).
 
-3. Install the AWS CDK CLI and projen: `npm install -g aws-cdk projen`
+3. Install the AWS CDK CLI: `npm install -g aws-cdk`
 
-4. Install the projects dependencies using: `pip install -r requirements.txt` and `pip install -r requirements-dev.txt`
+4. Install uv (if needed) and sync dependencies: `uv sync`
 
 5. Customize the AWS Region and Account IDs in the [.projenrc.py](./.projenrc.py) file to match your AWS setup:
 
@@ -77,13 +77,13 @@ target_accounts = {
 }
 ```
 
-6. Run `projen` to generate the github actions workflow files.
+6. Run `uv run projen` to generate the github actions workflow files.
 
 7. AWS CLI Authentication: Ensure you're logged into an AWS Account (one of the ones you configured in step 4) via the AWS CLI. If you haven't set up the AWS CLI, [then follow this guide](https://towardsthecloud.com/set-up-aws-cli-aws-sso))
 
 8. Deploy the CDK toolkit stack to your AWS environment with `cdk bootstrap` if it's not already set up.
 
-9. Deploy the GitHub OIDC Stack to enable GitHub Actions workflow permissions for AWS deployments. For instance, if you set up a `dev` environment, execute `projen dev:deploy`.
+9. Deploy the GitHub OIDC Stack to enable GitHub Actions workflow permissions for AWS deployments. For instance, if you set up a `dev` environment, execute `uv run projen dev:deploy`.
 
 10. Commit and push your changes to the `main` branch to trigger the CDK deploy pipeline in GitHub.
 
@@ -104,8 +104,8 @@ Here’s a closer look at how this structure enhances maintainability and scalab
 ```bash
 .
 ├── cdk.json
-├── requirements.txt
-├── requirements-dev.txt
+├── pyproject.toml
+├── uv.lock
 ├── README.md
 ├── src
 │  ├── __init__.py
