@@ -2,11 +2,15 @@
   "dependencies": [
     {
       "name": "projen",
-      "version": "0.99.12",
+      "version": "0.99.17",
       "type": "devenv"
     },
     {
       "name": "ruff",
+      "type": "devenv"
+    },
+    {
+      "name": "ty",
       "type": "devenv"
     },
     {

@@ -35,7 +35,7 @@ project = AwsCdkPythonApp(
     version="2.100.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.99.12", "ruff"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=["projen@0.99.17", "ruff", "ty"],  # Find the latest projen version here: https://pypi.org/project/projen/
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
