@@ -18,13 +18,7 @@ class NetworkConstruct(BaseConstruct):
         super().__init__(scope, id)
 
         # Determine bucket properties based on the environment
-        if self.environment == "production":
-            bucket_props = {}
-        else:
-            bucket_props = {
-                "auto_delete_objects": True,
-                "removal_policy": RemovalPolicy.DESTROY,
-            }
+        is_production = self.environment == "production"
 
         # Create a VPC with 9 subnets divided over 3 AZs (3 public, 3 private, 3 isolated)
         cidr = (
@@ -50,7 +44,10 @@ class NetworkConstruct(BaseConstruct):
                             "VpcFlowLogBucket",
                             encryption=s3.BucketEncryption.S3_MANAGED,
                             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-                            **bucket_props,
+                            auto_delete_objects=None if is_production else True,
+                            removal_policy=None
+                            if is_production
+                            else RemovalPolicy.DESTROY,
                         )
                     ),
                     traffic_type=ec2.FlowLogTrafficType.REJECT,

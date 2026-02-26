@@ -19,9 +19,7 @@ def cdk_action_task(project: AwsCdkPythonApp, target_account: Dict[str, str]):
 
         project.add_task(
             task_name,
-            **{
-                "description": task_description,
-                "env": target_account,
-                "exec": exec_command,
-            },
+            description=task_description,
+            env=target_account,
+            exec=exec_command,
         )
