@@ -19,4 +19,4 @@ dependencies = [
   email = "danny@towardsthecloud.com"
 
 [dependency-groups]
-dev = [ "projen==0.99.17", "ruff", "ty", "pytest==9.0.2" ]
+dev = [ "projen==0.99.17", "ruff", "ty", "pytest==9.0.3" ]
