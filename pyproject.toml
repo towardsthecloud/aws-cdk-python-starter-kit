@@ -4,14 +4,14 @@ tool = { }
 
 [project]
 name = "aws-cdk-python-starter-kit"
-version = "2.100.0"
+version = "2.101.0"
 description = "Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "aws-cdk-github-oidc",
-  "aws-cdk-lib==2.221.0",
-  "constructs>=10.0.5,<11.0.0"
+  "aws-cdk-lib==2.254.0",
+  "constructs>=10.5.1,<11.0.0"
 ]
 
   [[project.authors]]
@@ -19,4 +19,4 @@ dependencies = [
   email = "danny@towardsthecloud.com"
 
 [dependency-groups]
-dev = [ "projen==0.99.17", "ruff", "ty", "pytest==9.0.2" ]
+dev = [ "projen==0.99.62", "ruff", "ty", "pytest==7.4.3" ]
