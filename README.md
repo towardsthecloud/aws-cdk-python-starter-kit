@@ -1,10 +1,10 @@
 # [![AWS CDK Python Starter Kit header](./images/github-title-banner.png)](https://towardsthecloud.com)
 
-# AWS CDK Python Starter Kit
+## AWS CDK Python Starter Kit
 
 Production-ready AWS CDK Python starter kit template with secure OIDC authentication and automated CI/CD. Deploy infrastructure to AWS in minutes with projen-powered configuration.
 
-## 🚀 Features
+### 🚀 Features
 
 - **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
   - Preconfigured Python with uv dependency management via [pyproject.toml](./pyproject.toml)
@@ -37,15 +37,18 @@ Production-ready AWS CDK Python starter kit template with secure OIDC authentica
 > ### Here's what's included:
 >
 > **1. We Provision a Secure [AWS CDK Landing Zone](https://towardsthecloud.com/services/aws-cdk-landing-zone) That Accelerates Compliance**
+>
 > - Multi-account architecture with security controls and compliance guardrails from day one
 > - Scores 100% on the [CIS AWS Foundations Benchmark](https://docs.aws.amazon.com/securityhub/latest/userguide/cis-aws-foundations-benchmark.html) and 96% on [AWS Foundational Security Best Practices](https://docs.aws.amazon.com/securityhub/latest/userguide/fsbp-standard.html)
 > - Those benchmarks map straight to **SOC 2**, **HIPAA**, and **PCI-DSS** controls, cutting months from your compliance timeline
 >
 > **2. We Monitor Proactively to Stop Cost Waste and Security Drift**
+>
 > - Quarterly cost reviews catch unattached volumes, oversized instances, and orphaned resources before they compound. AWS spend drops 20-30% on average, with [outliers hitting 60+%](https://towardsthecloud.com/services/aws-cost-optimization#case-study)
 > - Continuous security monitoring across all accounts catches misconfigurations immediately. You get alerts while issues are still fixable, not after they're breaches
 >
 > **3. We Provide Senior AWS Expertise That Speeds Up Delivery**
+>
 > - Your developers get production-ready IaC templates for common patterns: multi-AZ applications, event-driven architectures, secure data pipelines. What takes weeks of research ships in hours
 > - Architecture guidance on VPC design, IAM policies, disaster recovery, and observability from engineers who've solved these problems at enterprise scale
 >
@@ -55,7 +58,7 @@ Production-ready AWS CDK Python starter kit template with secure OIDC authentica
 > </details>
 <!-- TIP-LIST:END -->
 
-## Setup Guide
+### Setup Guide
 
 All the config that is needed to personalise the CDK App to your environment is defined in the [.projenrc.py file](./.projenrc.py).
 
@@ -97,11 +100,21 @@ target_accounts = {
 
 9. Deploy the GitHub OIDC Stack to enable GitHub Actions workflow permissions for AWS deployments. For instance, if you set up a `dev` environment, execute `uv run projen dev:deploy`.
 
-10. Commit and push your changes to the `main` branch to trigger the CDK deploy pipeline in GitHub.
+   Local synth resolves your repository's numeric GitHub IDs through `gh api`, so run `gh auth login` first.
+
+10. Opt the repository into immutable OIDC subject claims:
+
+    ```bash
+    gh api -X PUT repos/OWNER/REPOSITORY/actions/oidc/customization/sub -F use_default=true -F use_immutable_subject=true
+    ```
+
+    The deploy role only trusts the immutable claim, so do this after step 9. See [`src/stacks/README.md`](./src/stacks/README.md#github-immutable-oidc-subjects).
+
+11. Commit and push your changes to the `main` branch to trigger the CDK deploy pipeline in GitHub.
 
 Congratulations 🎉! You've successfully set up your project.
 
-## Project Structure
+### Project Structure
 
 When working on smaller projects using infrastructure as code, where you deploy single applications that don’t demand extensive maintenance or collaboration from multiple teams, it’s recommended to structure your AWS CDK project in a way that enables you to deploy both the application and infrastructure using a single stack.
 
@@ -145,7 +158,9 @@ Here’s a closer look at how this structure enhances maintainability and scalab
 │     └── README.md
 └── tests
    ├── __init__.py
-   └── test_example.py
+   ├── test_example.py
+   ├── test_git_helper.py
+   └── test_github_oidc_stack.py
 ```
 
 As you can see in the above tree diagram, the way this project is setup it tries to segment it into logical units, such as **constructs** for reusable infrastructure patterns, **stacks** for deploying groups of resources and **assets** for managing source code of containers and lambda functions.
@@ -159,15 +174,15 @@ Here is a brief explanation of what each section does:
 - `src/lib/main.ts`: This is where the CDK app is instantiated.
 - `test`: Is the location to store your unit or integration tests (powered by jest)
 
-## AWS CDK Starter Kit for TypeScript Users
+### AWS CDK Starter Kit for TypeScript Users
 
 > **Looking for the TypeScript version of this AWS CDK Starter Kit?** Check out the [AWS CDK Starter Kit](https://github.com/towardsthecloud/aws-cdk-starter-kit) for a tailored experience that leverages the full power of AWS CDK with TypeScript.
 
-## Acknowledgements
+### Acknowledgements
 
 A heartfelt thank you to the creators of [projen](https://github.com/projen/projen). This starter kit stands on the shoulders of giants, made possible by their pioneering work in simplifying cloud infrastructure projects!
 
-## Author
+### Author
 
 [Danny Steenman](https://towardsthecloud.com/about)
 

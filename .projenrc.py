@@ -34,8 +34,14 @@ project = AwsCdkPythonApp(
     description="Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!",
     version="2.101.0",
     app_entrypoint=f"{python_module_name}/app.py",
-    deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.99.62", "ruff", "ty"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=[
+        "projen@0.99.62",
+        "ruff",
+        "ty",
+    ],  # Find the latest projen version here: https://pypi.org/project/projen/
+    pytest_options={
+        "version": "9.0.3"
+    },  # Find the latest pytest version here: https://pypi.org/project/pytest/
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
@@ -47,7 +53,18 @@ project = AwsCdkPythonApp(
     github_options={
         "pull_request_lint_options": {
             "semantic_title_options": {
-                "types": ["feat", "fix", "chore", "refactor", "perf", "docs", "style", "test", "build", "ci"],
+                "types": [
+                    "feat",
+                    "fix",
+                    "chore",
+                    "refactor",
+                    "perf",
+                    "docs",
+                    "style",
+                    "test",
+                    "build",
+                    "ci",
+                ],
             },
         },
     },
@@ -73,6 +90,13 @@ project = AwsCdkPythonApp(
 # Set the CDK_DEFAULT_REGION environment variable for the projen tasks,
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
+
+# The CDK app entrypoint lives in `src`, so Python puts that directory on sys.path and the
+# modules import each other as `stacks.x` and `bin.y`. pytest collects from the repository
+# root instead, so give it the same import root or every test module fails to collect.
+pyproject = project.try_find_object_file("pyproject.toml")
+if pyproject:
+    pyproject.add_override("tool.pytest.ini_options.pythonpath", [python_module_name])
 
 # Define the target AWS accounts for the different environments
 target_accounts = {
@@ -113,7 +137,9 @@ YamlFile(
 )
 
 # Add auto-merge step to the auto-approve workflow
-auto_approve_workflow = project.try_find_object_file(".github/workflows/auto-approve.yml")
+auto_approve_workflow = project.try_find_object_file(
+    ".github/workflows/auto-approve.yml"
+)
 if auto_approve_workflow:
     auto_approve_workflow.add_override("jobs.approve.permissions.contents", "write")
     # Add checkout step before the merge step

@@ -14,10 +14,6 @@
       "type": "devenv"
     },
     {
-      "name": "aws-cdk-github-oidc",
-      "type": "runtime"
-    },
-    {
       "name": "aws-cdk-lib",
       "version": "2.254.0",
       "type": "runtime"
@@ -29,7 +25,7 @@
     },
     {
       "name": "pytest",
-      "version": "7.4.3",
+      "version": "9.0.3",
       "type": "test"
     }
   ],

@@ -54,22 +54,6 @@ wheels = [
 ]
 
 [[package]]
-name = "aws-cdk-github-oidc"
-version = "4.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "aws-cdk-lib" },
-    { name = "constructs" },
-    { name = "jsii" },
-    { name = "publication" },
-    { name = "typeguard" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c3/17/a461c5f4249a1303d98f912991091875af0c9254d07b4e7edb52834c6800/aws_cdk_github_oidc-4.1.0.tar.gz", hash = "sha256:da1d6d02e62d7a7db5d1b0c6e5903a4381533a0b4e96921d6315b8b77917bd93", size = 100389, upload-time = "2026-04-02T14:31:53.803Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/42/24bcbd3ed439bd3dd2489eef0f18a1491862397bbe5ee783c2704f52ae2f/aws_cdk_github_oidc-4.1.0-py3-none-any.whl", hash = "sha256:426a37819d3eca75e291f3c112fd18dfb304aef8f90d3fdd73a663225f34e150", size = 98251, upload-time = "2026-04-02T14:31:52.379Z" },
-]
-
-[[package]]
 name = "aws-cdk-lib"
 version = "2.254.0"
 source = { registry = "https://pypi.org/simple" }
@@ -92,7 +76,6 @@ name = "aws-cdk-python-starter-kit"
 version = "2.101.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "aws-cdk-github-oidc" },
     { name = "aws-cdk-lib" },
     { name = "constructs" },
 ]
@@ -107,7 +90,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aws-cdk-github-oidc" },
     { name = "aws-cdk-lib", specifier = "==2.254.0" },
     { name = "constructs", specifier = ">=10.5.1,<11.0.0" },
 ]
