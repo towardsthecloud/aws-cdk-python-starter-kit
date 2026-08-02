@@ -505,14 +505,11 @@ def _create_cdk_deployment_workflow(
     )
 
     triggers: dict[str, Any] = {"workflow_dispatch": {}}
-    chained_on_previous_environment = False
 
     if deploy_for_branch:
         triggers["push"] = {"branches": _branch_filter()}
     else:
-        current_index = (
-            ordered_environments.index(env) if env in ordered_environments else -1
-        )
+        current_index = ordered_environments.index(env)
         if current_index == 0:
             triggers["push"] = {"branches": ["main"]}
         elif current_index > 0:
@@ -522,7 +519,6 @@ def _create_cdk_deployment_workflow(
                 "workflows": [f"cdk-deploy-{previous_env}"],
                 "types": ["completed"],
             }
-            chained_on_previous_environment = True
 
     workflow.on(**triggers)
 
@@ -548,7 +544,7 @@ def _create_cdk_deployment_workflow(
         "steps": steps,
     }
 
-    if chained_on_previous_environment:
+    if "workflow_run" in triggers:
         # workflow_run fires on completion regardless of outcome, so a failed test deploy would
         # otherwise promote straight to production.
         job["if"] = "github.event.workflow_run.conclusion == 'success'"

@@ -58,15 +58,15 @@ class BucketPublicAccessAspect:
         except ValueError:
             return
 
+        # Only a bucket with no configuration at all falls through to the correction below.
         if configuration is not None:
             if Tokenization.is_resolvable(configuration):
                 return
-            if isinstance(
+            if not isinstance(
                 configuration, s3.CfnBucket.PublicAccessBlockConfigurationProperty
             ):
-                if configuration.block_public_acls is True:
-                    return
-            else:
+                return
+            if configuration.block_public_acls is True:
                 return
 
         Annotations.of(node).add_warning(

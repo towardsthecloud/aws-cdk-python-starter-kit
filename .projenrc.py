@@ -14,7 +14,11 @@ from src.bin.cicd_helper import (
     create_cdk_diff_pr_workflow,
     create_release_workflow,
 )
-from src.bin.env_helper import EnvironmentConfig, add_cdk_action_task
+from src.bin.env_helper import (
+    DEFAULT_GITHUB_DEPLOY_ROLE_NAME,
+    EnvironmentConfig,
+    add_cdk_action_task,
+)
 
 # Define the python module name and set the python version
 project_name = "aws-cdk-python-starter-kit"
@@ -32,8 +36,9 @@ cdk_cli_version = "2.1134.0"  # Find the latest CDK CLI version here: https://py
 aws_region = os.getenv("AWS_REGION", "us-east-1")
 
 # Name of the GitHub deploy role created by the FoundationStack. Set as an environment variable
-# for the projen tasks so the CDK app and the workflows agree on one name.
-github_role = "GitHubActionsServiceRole"
+# for the projen tasks so the CDK app and the workflows agree on one name. Sourced from
+# env_helper rather than retyped, because the construct falls back to the same constant.
+github_role = DEFAULT_GITHUB_DEPLOY_ROLE_NAME
 
 project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
@@ -219,26 +224,22 @@ if gh:
     create_release_workflow(gh, python_version)
 
     for config in environment_configs:
+        task_environment = {
+            "CDK_DEFAULT_ACCOUNT": config.account_id,
+            "CDK_DEFAULT_REGION": aws_region,
+            "ENVIRONMENT": config.name,
+            "GITHUB_DEPLOY_ROLE": github_role,
+        }
+
         # Adds `uv run projen` commands for executing cdk synth, diff, deploy, destroy and ls
-        add_cdk_action_task(
-            project,
-            {
-                "CDK_DEFAULT_ACCOUNT": config.account_id,
-                "CDK_DEFAULT_REGION": aws_region,
-                "ENVIRONMENT": config.name,
-                "GITHUB_DEPLOY_ROLE": github_role,
-            },
-        )
+        add_cdk_action_task(project, task_environment)
 
         # If branch deployment is enabled for this environment, add the GIT_BRANCH_REF tasks
         if config.enable_branch_deploy:
             add_cdk_action_task(
                 project,
                 {
-                    "CDK_DEFAULT_ACCOUNT": config.account_id,
-                    "CDK_DEFAULT_REGION": aws_region,
-                    "ENVIRONMENT": config.name,
-                    "GITHUB_DEPLOY_ROLE": github_role,
+                    **task_environment,
                     "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})",
                 },
             )

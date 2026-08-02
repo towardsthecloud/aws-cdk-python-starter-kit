@@ -10,6 +10,7 @@ from aws_cdk.aws_iam import (
 )
 from constructs import Construct
 
+from bin.env_helper import DEFAULT_GITHUB_DEPLOY_ROLE_NAME
 from bin.git_helper import (
     GitHubRepositoryReference,
     build_github_actions_oidc_subject,
@@ -18,7 +19,6 @@ from bin.git_helper import (
 )
 
 GITHUB_DOMAIN = "token.actions.githubusercontent.com"
-DEFAULT_ROLE_NAME = "GitHubActionsServiceRole"
 
 
 class GitHubActionsOidcConstruct(Construct):
@@ -104,5 +104,5 @@ class GitHubActionsOidcConstruct(Construct):
             ],
             max_session_duration=max_session_duration or Duration.hours(2),
             role_name=role_name
-            or os.environ.get("GITHUB_DEPLOY_ROLE", DEFAULT_ROLE_NAME),
+            or os.environ.get("GITHUB_DEPLOY_ROLE", DEFAULT_GITHUB_DEPLOY_ROLE_NAME),
         )

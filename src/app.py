@@ -2,12 +2,16 @@ import os
 
 import aws_cdk as cdk
 
-from bin.env_helper import create_env_resource_name
+from bin.env_helper import (
+    DEFAULT_ENVIRONMENT,
+    create_env_resource_name,
+    extract_cleaned_branch_name,
+)
 from stacks.foundation_stack import FoundationStack
 from stacks.starter_stack import StarterStack
 
 # Inherit environment variables from the `uv run projen` commands (see .projen/tasks.json)
-environment = os.environ.get("ENVIRONMENT", "dev")
+environment = os.environ.get("ENVIRONMENT", DEFAULT_ENVIRONMENT)
 aws_environment = cdk.Environment(
     account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION")
 )
@@ -38,8 +42,9 @@ StarterStack(
 cdk.Tags.of(app).add("environment", environment)
 
 # Tag branch based deploys with the branch name to easily identify the branch in the AWS console
-if os.environ.get("GIT_BRANCH_REF"):
-    cdk.Tags.of(app).add("branch", create_env_resource_name("b"))
+branch_name = extract_cleaned_branch_name(os.environ.get("GIT_BRANCH_REF"))
+if branch_name:
+    cdk.Tags.of(app).add("branch", branch_name)
 
 # Synthesize the CDK app
 app.synth()

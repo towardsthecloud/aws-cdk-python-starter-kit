@@ -1,15 +1,31 @@
+from __future__ import annotations
+
 import os
 import re
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
-from projen.awscdk import AwsCdkPythonApp
+if TYPE_CHECKING:
+    # Only needed to annotate `add_cdk_action_task`. Importing projen at runtime would drag the
+    # build tool into the CDK app, which imports this module for `create_env_resource_name`.
+    from projen.awscdk import AwsCdkPythonApp
 
 Environment = Literal["sandbox", "development", "test", "staging", "production"]
 """The deployment environments this project supports."""
 
 SUPPORTED_CDK_ACTIONS = ("synth", "diff", "deploy", "deploy:hotswap", "destroy", "ls")
 """CDK actions that get a generated projen task."""
+
+DEFAULT_ENVIRONMENT = "dev"
+"""Environment assumed when `ENVIRONMENT` is unset, as it is on a bare `cdk synth`."""
+
+DEFAULT_GITHUB_DEPLOY_ROLE_NAME = "GitHubActionsServiceRole"
+"""Name of the role GitHub Actions assumes.
+
+Owned here because two sides must agree on it: `FoundationStack` creates the role, and the
+generated workflows put its ARN in `role-to-assume`. A rename in only one of them leaves CI
+requesting a role that does not exist.
+"""
 
 # A resource name longer than this breaks the strictest AWS naming constraints.
 MAX_RESOURCE_NAME_LENGTH = 64
@@ -18,8 +34,7 @@ MAX_BRANCH_NAME_LENGTH = 25
 
 GIT_TAG_PATTERN = re.compile(r"v\d+\.\d+\.\d+$")
 NON_RESOURCE_NAME_CHARACTERS = re.compile(r"[^a-zA-Z0-9-]")
-TRAILING_HYPHENS = re.compile(r"-+$")
-TRAILING_NON_ALPHANUMERIC = re.compile(r"[^a-zA-Z0-9]+$")
+TRAILING_SEPARATORS = re.compile(r"[^a-zA-Z0-9]+$")
 
 # Deploying a branch stack from one of these would collide with the shared environment stacks.
 LONG_LIVED_BRANCHES = frozenset({"main", "develop", "development"})
@@ -172,7 +187,9 @@ def extract_cleaned_branch_name(git_branch_ref: str | None) -> str | None:
     if last_part in LONG_LIVED_BRANCHES:
         return None
 
-    cleaned = TRAILING_HYPHENS.sub("", NON_RESOURCE_NAME_CHARACTERS.sub("", last_part))
+    cleaned = TRAILING_SEPARATORS.sub(
+        "", NON_RESOURCE_NAME_CHARACTERS.sub("", last_part)
+    )
     return cleaned[:MAX_BRANCH_NAME_LENGTH]
 
 
@@ -190,7 +207,7 @@ def create_env_resource_name(base_name: str) -> str:
             collide with the shared environment stacks.
     """
     branch_name = os.environ.get("GIT_BRANCH_REF")
-    environment = os.environ.get("ENVIRONMENT", "dev")
+    environment = os.environ.get("ENVIRONMENT", DEFAULT_ENVIRONMENT)
 
     if branch_name and branch_name.lower() == "main":
         raise ValueError(
@@ -205,4 +222,4 @@ def create_env_resource_name(base_name: str) -> str:
         return resource_name
 
     # Truncating can leave a trailing hyphen, which most AWS resource names reject.
-    return TRAILING_NON_ALPHANUMERIC.sub("", resource_name[:MAX_RESOURCE_NAME_LENGTH])
+    return TRAILING_SEPARATORS.sub("", resource_name[:MAX_RESOURCE_NAME_LENGTH])
