@@ -29,10 +29,11 @@ python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
 
 # Pin the CDK CLI so local runs, CI and the lockfile agree on one version. The PyPI package
 # ships the same CLI as the npm one, so no workflow needs Node.js installed separately.
-cdk_cli_version = "2.1134.0"  # Find the latest CDK CLI version here: https://pypi.org/project/aws-cdk-cli/
+cdk_cli_version = "2.1130.0"  # Find the latest CDK CLI version here: https://pypi.org/project/aws-cdk-cli/
 
-# Packages whose versions this file pins. Dependabot ignores them because the next synth would
-# revert its bump, and the minimum-release-age gate exempts them because the pin is deliberate.
+# Packages whose versions this file pins, so Dependabot ignores them: the next synth would
+# revert its bump. Keep these pinned to releases older than MINIMUM_RELEASE_AGE_DAYS, or
+# `uv lock` fails outright rather than merely declining the upgrade.
 PINNED_PACKAGES = ["aws-cdk-lib", "aws-cdk-cli", "projen", "pytest"]
 
 # Ignore releases younger than this when resolving. Matches the TypeScript kit's pnpm setting.
@@ -51,7 +52,7 @@ project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
     cdk_version_pinning=True,
-    cdk_version="2.263.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_version="2.254.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
     cdk_cli_version=cdk_cli_version,
     module_name=python_module_name,
     name=project_name,
@@ -61,13 +62,13 @@ project = AwsCdkPythonApp(
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["cloudstructs"],  # Runtime dependencies of this module
     dev_deps=[
-        "projen@0.101.23",
+        "projen@0.99.62",
         "ruff",
         "ty",
         f"aws-cdk-cli@{cdk_cli_version}",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
     pytest_options={
-        "version": "9.1.1"
+        "version": "9.0.3"
     },  # Find the latest pytest version here: https://pypi.org/project/pytest/
     context={
         "cli-telemetry": False,  # Disable AWS CDK CLI telemetry, see: https://github.com/aws/aws-cdk/issues/34892
@@ -152,13 +153,6 @@ if pyproject:
     # so it needs no maintenance. Resolution only happens on `uv lock`; `uv sync --frozen`
     # installs exactly what the lockfile pins and is unaffected.
     pyproject.add_override("tool.uv.exclude-newer", f"{MINIMUM_RELEASE_AGE_DAYS} days")
-    # The versions pinned above are a deliberate choice, so the age gate must not veto them:
-    # pin a CDK release on its publication day and resolution would otherwise fail outright.
-    # "0 days" means no age restriction for that package.
-    pyproject.add_override(
-        "tool.uv.exclude-newer-package",
-        {name: "0 days" for name in PINNED_PACKAGES},
-    )
 
 # Add VSCode extensions recommendation
 JsonFile(

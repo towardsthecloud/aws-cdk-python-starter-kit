@@ -2,12 +2,12 @@
   "dependencies": [
     {
       "name": "aws-cdk-cli",
-      "version": "2.1134.0",
+      "version": "2.1130.0",
       "type": "devenv"
     },
     {
       "name": "projen",
-      "version": "0.101.23",
+      "version": "0.99.62",
       "type": "devenv"
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "2.263.0",
+      "version": "2.254.0",
       "type": "runtime"
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "name": "pytest",
-      "version": "9.1.1",
+      "version": "9.0.3",
       "type": "test"
     }
   ],
