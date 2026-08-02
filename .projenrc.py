@@ -26,8 +26,8 @@ project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
     cdk_version_pinning=True,
-    cdk_version="2.254.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1117.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
+    cdk_version="2.263.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_cli_version="2.1134.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
     module_name=python_module_name,
     name=project_name,
     projen_command="uv run projen",
@@ -35,12 +35,12 @@ project = AwsCdkPythonApp(
     version="2.101.0",
     app_entrypoint=f"{python_module_name}/app.py",
     dev_deps=[
-        "projen@0.99.62",
+        "projen@0.101.23",
         "ruff",
         "ty",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
     pytest_options={
-        "version": "9.0.3"
+        "version": "9.1.1"
     },  # Find the latest pytest version here: https://pypi.org/project/pytest/
     uv=True,
     uv_options={
