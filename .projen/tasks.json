@@ -1,4 +1,10 @@
 {
+  "manifestVersion": 3,
+  "env": {
+    "VIRTUAL_ENV": ".venv",
+    "PATH": "$(echo .venv/bin:$PATH)",
+    "CDK_DEFAULT_REGION": "us-east-1"
+  },
   "tasks": {
     "build": {
       "name": "build",
@@ -65,7 +71,10 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "exec": "python .projenrc.py"
+          "execArgs": [
+            "python",
+            ".projenrc.py"
+          ]
         }
       ]
     },
@@ -74,7 +83,10 @@
       "description": "Deploys your CDK app to the AWS cloud",
       "steps": [
         {
-          "exec": "cdk deploy",
+          "execArgs": [
+            "cdk",
+            "deploy"
+          ],
           "receiveArgs": true
         }
       ]
@@ -84,60 +96,11 @@
       "description": "Destroys your cdk app in the AWS cloud",
       "steps": [
         {
-          "exec": "cdk destroy",
+          "execArgs": [
+            "cdk",
+            "destroy"
+          ],
           "receiveArgs": true
-        }
-      ]
-    },
-    "dev:deploy": {
-      "name": "dev:deploy",
-      "description": "Deploy the stacks on the DEV account",
-      "env": {
-        "CDK_DEFAULT_ACCOUNT": "987654321012",
-        "ENVIRONMENT": "dev"
-      },
-      "steps": [
-        {
-          "exec": "cdk deploy --require-approval never *Stack-dev"
-        }
-      ]
-    },
-    "dev:destroy": {
-      "name": "dev:destroy",
-      "description": "Destroy the stacks on the DEV account",
-      "env": {
-        "CDK_DEFAULT_ACCOUNT": "987654321012",
-        "ENVIRONMENT": "dev"
-      },
-      "steps": [
-        {
-          "exec": "cdk destroy --force *Stack-dev"
-        }
-      ]
-    },
-    "dev:diff": {
-      "name": "dev:diff",
-      "description": "Diff the stacks on the DEV account",
-      "env": {
-        "CDK_DEFAULT_ACCOUNT": "987654321012",
-        "ENVIRONMENT": "dev"
-      },
-      "steps": [
-        {
-          "exec": "cdk diff --require-approval never *Stack-dev"
-        }
-      ]
-    },
-    "dev:synth": {
-      "name": "dev:synth",
-      "description": "Synth the stacks on the DEV account",
-      "env": {
-        "CDK_DEFAULT_ACCOUNT": "987654321012",
-        "ENVIRONMENT": "dev"
-      },
-      "steps": [
-        {
-          "exec": "cdk synth"
         }
       ]
     },
@@ -146,7 +109,10 @@
       "description": "Diffs the currently deployed app against your code",
       "steps": [
         {
-          "exec": "cdk diff"
+          "execArgs": [
+            "cdk",
+            "diff"
+          ]
         }
       ]
     },
@@ -176,7 +142,22 @@
       "description": "Install dependencies with frozen lockfile",
       "steps": [
         {
-          "exec": "uv sync"
+          "execArgs": [
+            "uv",
+            "sync"
+          ]
+        }
+      ]
+    },
+    "lint": {
+      "name": "lint",
+      "description": "Lint and auto-fix the codebase using Ruff",
+      "steps": [
+        {
+          "exec": "ruff check --fix"
+        },
+        {
+          "exec": "ruff format"
         }
       ]
     },
@@ -185,7 +166,10 @@
       "description": "Creates the distribution package",
       "steps": [
         {
-          "exec": "uv build"
+          "execArgs": [
+            "uv",
+            "build"
+          ]
         }
       ]
     },
@@ -202,12 +186,138 @@
       "name": "pre-compile",
       "description": "Prepare the project for compilation"
     },
+    "production:deploy:all": {
+      "name": "production:deploy:all",
+      "description": "Deploy all stacks on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk deploy --require-approval never --all"
+        }
+      ]
+    },
+    "production:deploy:stack": {
+      "name": "production:deploy:stack",
+      "description": "Deploy specific stack(s) on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk deploy --require-approval never",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "production:destroy:all": {
+      "name": "production:destroy:all",
+      "description": "Destroy all stacks on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --force --all"
+        }
+      ]
+    },
+    "production:destroy:stack": {
+      "name": "production:destroy:stack",
+      "description": "Destroy specific stack(s) on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --force",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "production:diff:all": {
+      "name": "production:diff:all",
+      "description": "Diff all stacks on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff --all"
+        }
+      ]
+    },
+    "production:diff:stack": {
+      "name": "production:diff:stack",
+      "description": "Diff specific stack(s) on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "production:ls": {
+      "name": "production:ls",
+      "description": "Ls the stacks on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk ls"
+        }
+      ]
+    },
+    "production:synth": {
+      "name": "production:synth",
+      "description": "Synth the stacks on the PRODUCTION account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "production",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk synth"
+        }
+      ]
+    },
     "publish": {
       "name": "publish",
       "description": "Uploads the package to PyPI.",
       "steps": [
         {
-          "exec": "uv publish"
+          "execArgs": [
+            "uv",
+            "publish"
+          ]
         }
       ]
     },
@@ -216,7 +326,12 @@
       "description": "Uploads the package against a test PyPI endpoint.",
       "steps": [
         {
-          "exec": "uv publish --index testpypi"
+          "execArgs": [
+            "uv",
+            "publish",
+            "--index",
+            "testpypi"
+          ]
         }
       ]
     },
@@ -225,7 +340,10 @@
       "description": "Synthesizes your cdk app into cdk.out",
       "steps": [
         {
-          "exec": "cdk synth"
+          "execArgs": [
+            "cdk",
+            "synth"
+          ]
         }
       ]
     },
@@ -234,7 +352,11 @@
       "description": "Synthesizes your cdk app into cdk.out and suppresses the template in stdout (part of \"yarn build\")",
       "steps": [
         {
-          "exec": "cdk synth -q"
+          "execArgs": [
+            "cdk",
+            "synth",
+            "-q"
+          ]
         }
       ]
     },
@@ -244,45 +366,284 @@
       "steps": [
         {
           "exec": "pytest"
+        },
+        {
+          "spawn": "lint"
+        },
+        {
+          "spawn": "typecheck"
         }
       ]
     },
-    "test:deploy": {
-      "name": "test:deploy",
-      "description": "Deploy the stacks on the TEST account",
+    "test:branch:deploy:all": {
+      "name": "test:branch:deploy:all",
+      "description": "Deploy all stacks on the TEST account",
       "env": {
-        "CDK_DEFAULT_ACCOUNT": "123456789012",
-        "ENVIRONMENT": "test"
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
       },
       "steps": [
         {
-          "exec": "cdk deploy --require-approval never *Stack-test"
+          "exec": "cdk deploy --express --require-approval never --all"
         }
       ]
     },
-    "test:destroy": {
-      "name": "test:destroy",
-      "description": "Destroy the stacks on the TEST account",
+    "test:branch:deploy:hotswap:all": {
+      "name": "test:branch:deploy:hotswap:all",
+      "description": "Hotswap deploy all stacks on the TEST account",
       "env": {
-        "CDK_DEFAULT_ACCOUNT": "123456789012",
-        "ENVIRONMENT": "test"
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
       },
       "steps": [
         {
-          "exec": "cdk destroy --force *Stack-test"
+          "exec": "cdk deploy --hotswap --require-approval never --all"
         }
       ]
     },
-    "test:diff": {
-      "name": "test:diff",
-      "description": "Diff the stacks on the TEST account",
+    "test:branch:deploy:hotswap:stack": {
+      "name": "test:branch:deploy:hotswap:stack",
+      "description": "Hotswap deploy specific stack(s) on the TEST account",
       "env": {
-        "CDK_DEFAULT_ACCOUNT": "123456789012",
-        "ENVIRONMENT": "test"
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
       },
       "steps": [
         {
-          "exec": "cdk diff --require-approval never *Stack-test"
+          "exec": "cdk deploy --hotswap --require-approval never",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:branch:deploy:stack": {
+      "name": "test:branch:deploy:stack",
+      "description": "Deploy specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk deploy --express --require-approval never",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:branch:destroy:all": {
+      "name": "test:branch:destroy:all",
+      "description": "Destroy all stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --express --force --all"
+        }
+      ]
+    },
+    "test:branch:destroy:stack": {
+      "name": "test:branch:destroy:stack",
+      "description": "Destroy specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --express --force",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:branch:diff:all": {
+      "name": "test:branch:diff:all",
+      "description": "Diff all stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff --all"
+        }
+      ]
+    },
+    "test:branch:diff:stack": {
+      "name": "test:branch:diff:stack",
+      "description": "Diff specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:branch:ls": {
+      "name": "test:branch:ls",
+      "description": "Ls the stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk ls"
+        }
+      ]
+    },
+    "test:branch:synth": {
+      "name": "test:branch:synth",
+      "description": "Synth the stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole",
+        "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})"
+      },
+      "steps": [
+        {
+          "exec": "cdk synth"
+        }
+      ]
+    },
+    "test:deploy:all": {
+      "name": "test:deploy:all",
+      "description": "Deploy all stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk deploy --require-approval never --all"
+        }
+      ]
+    },
+    "test:deploy:stack": {
+      "name": "test:deploy:stack",
+      "description": "Deploy specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk deploy --require-approval never",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:destroy:all": {
+      "name": "test:destroy:all",
+      "description": "Destroy all stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --force --all"
+        }
+      ]
+    },
+    "test:destroy:stack": {
+      "name": "test:destroy:stack",
+      "description": "Destroy specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk destroy --force",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:diff:all": {
+      "name": "test:diff:all",
+      "description": "Diff all stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff --all"
+        }
+      ]
+    },
+    "test:diff:stack": {
+      "name": "test:diff:stack",
+      "description": "Diff specific stack(s) on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk diff",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "test:ls": {
+      "name": "test:ls",
+      "description": "Ls the stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
+      },
+      "steps": [
+        {
+          "exec": "cdk ls"
         }
       ]
     },
@@ -290,12 +651,23 @@
       "name": "test:synth",
       "description": "Synth the stacks on the TEST account",
       "env": {
-        "CDK_DEFAULT_ACCOUNT": "123456789012",
-        "ENVIRONMENT": "test"
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "CDK_DEFAULT_REGION": "us-east-1",
+        "ENVIRONMENT": "test",
+        "GITHUB_DEPLOY_ROLE": "GitHubActionsServiceRole"
       },
       "steps": [
         {
           "exec": "cdk synth"
+        }
+      ]
+    },
+    "typecheck": {
+      "name": "typecheck",
+      "description": "Type check the codebase using ty",
+      "steps": [
+        {
+          "exec": "ty check src tests"
         }
       ]
     },
@@ -304,18 +676,20 @@
       "description": "Watches changes in your source code and rebuilds and deploys to the current account",
       "steps": [
         {
-          "exec": "cdk deploy --hotswap"
+          "execArgs": [
+            "cdk",
+            "deploy",
+            "--hotswap"
+          ]
         },
         {
-          "exec": "cdk watch"
+          "execArgs": [
+            "cdk",
+            "watch"
+          ]
         }
       ]
     }
-  },
-  "env": {
-    "VIRTUAL_ENV": ".venv",
-    "PATH": "$(echo .venv/bin:$PATH)",
-    "CDK_DEFAULT_REGION": "us-east-1"
   },
   "//": "~~ Generated by projen. To modify, edit .projenrc.py and run \"uv run projen\"."
 }

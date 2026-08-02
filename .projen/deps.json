@@ -1,8 +1,13 @@
 {
   "dependencies": [
     {
+      "name": "aws-cdk-cli",
+      "version": "2.1130.0",
+      "type": "devenv"
+    },
+    {
       "name": "projen",
-      "version": "0.99.62",
+      "version": "0.101.20",
       "type": "devenv"
     },
     {
@@ -19,13 +24,17 @@
       "type": "runtime"
     },
     {
+      "name": "cloudstructs",
+      "type": "runtime"
+    },
+    {
       "name": "constructs",
       "version": "^10.5.1",
       "type": "runtime"
     },
     {
       "name": "pytest",
-      "version": "9.0.3",
+      "version": "9.1.1",
       "type": "test"
     }
   ],

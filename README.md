@@ -2,17 +2,20 @@
 
 ## AWS CDK Python Starter Kit
 
-Production-ready AWS CDK Python starter kit template with secure OIDC authentication and automated CI/CD. Deploy infrastructure to AWS in minutes with projen-powered configuration.
+Deploy an AWS CDK app written in Python through GitHub Actions, without storing a single AWS credential. One projen config file generates the workflows, the tasks and the packaging.
 
 ### 🚀 Features
 
-- **⚡ Rapid Setup**: Jumpstart your project within minutes by tweaking a [single configuration file (projen)](./.projenrc.py)
-  - Preconfigured Python with uv dependency management via [pyproject.toml](./pyproject.toml)
-  - Pre-configured linting & formatting with [Ruff](https://github.com/astral-sh/ruff) for code quality
-  - Clean [project structure](#project-structure) for easy management of constructs and stacks
-- **🛡️ Seamless Security**: OIDC authentication for keyless AWS deployments - no stored credentials or long-lived secrets required
-- **🤖 Automated CI/CD**: Out-of-the-box GitHub Actions workflows with multi-account support for enterprise-ready deployments
-- **🚀 Enhanced Pull Requests**: Built-in pull request template for structured and informative code reviews
+- **⚡ One file to configure**: Set your accounts and region in [.projenrc.py](./.projenrc.py), run `uv run projen`, and the workflows, tasks and [pyproject.toml](./pyproject.toml) regenerate to match
+  - The CDK CLI is pinned in the lockfile alongside everything else, so your machine and CI run the same version
+  - [Ruff](https://github.com/astral-sh/ruff) for linting and formatting, [ty](https://github.com/astral-sh/ty) for type checking, both wired into the build
+  - A [project structure](#project-structure) that separates constructs, stacks and aspects instead of piling them into one file
+- **🛡️ Keyless deploys**: GitHub Actions assumes an IAM role through OIDC, so there's nothing in your repository secrets to leak. The trust policy pins GitHub's immutable subject claim, so renaming or recreating the repo can't hand its access to a different one
+- **🤖 Chained multi-account pipelines**: Push to `main` and `test` deploys. `production` runs only after `test` succeeds
+- **💬 CDK diff on every PR**: The [diff commenter](https://github.com/marketplace/actions/aws-cdk-diff-pr-commenter) posts what your change does to production before anyone approves it
+- **💻 Per-branch environments**: Push a feature branch and it gets its own stacks in the shared test account. Delete the branch and they go with it. Branch deploys use CDK express mode, [up to 4x faster](https://aws.amazon.com/about-aws/whats-new/2026/06/aws-cloudformation-cdk/) than a normal deploy
+- **🧹 Aspects you can switch on**: Four [aspects](./src/aspects/README.md) that catch an IAM role with no permission boundary, an unencrypted bucket, a bucket open to the public, and a VPC on public address space
+- **📦 Dependency updates that wait**: Dependabot opens grouped weekly PRs and nothing merges itself. uv skips any release younger than 7 days, so a bad publish has a week to get caught before it can reach your lockfile
 
 <!-- TIP-LIST:START -->
 > [!TIP]
@@ -60,7 +63,7 @@ Production-ready AWS CDK Python starter kit template with secure OIDC authentica
 
 ### Setup Guide
 
-All the config that is needed to personalise the CDK App to your environment is defined in the [.projenrc.py file](./.projenrc.py).
+Everything you need to change lives in [.projenrc.py](./.projenrc.py).
 
 **To get started, follow these steps:**
 
@@ -68,11 +71,9 @@ All the config that is needed to personalise the CDK App to your environment is 
 
 2. Add a Personal Access Token to the repository settings on GitHub, follow these [instructions for setting up a fine-grained personal access token](https://projen.io/docs/integrations/github/#fine-grained-personal-access-token-beta).
 
-3. Install the AWS CDK CLI: `npm install -g aws-cdk`
+3. Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync`. That pulls in the pinned CDK CLI too, so you don't need a global `npm install -g aws-cdk`.
 
-4. Install uv (if needed) and sync dependencies: `uv sync`
-
-5. Customize the AWS Region and Account IDs in the [.projenrc.py](./.projenrc.py) file to match your AWS setup:
+4. Customize the AWS Region and Account IDs in the [.projenrc.py](./.projenrc.py) file to match your AWS setup:
 
 ```python
 # Define the AWS region for the CDK app and github workflows
@@ -83,48 +84,43 @@ aws_region = os.getenv("AWS_REGION", "us-east-1")
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
 
-# Define the target AWS accounts for the different environments
-target_accounts = {
-    "dev": "987654321012",
-    "test": "123456789012",
-    "staging": None,
-    "production": None,
-}
+# Defines the environment configurations for the CDK application.
+# The order of this list is the deployment order in the pipeline: each environment's workflow
+# is chained onto the completion of the previous one, so `production` only runs after `test`
+# succeeded. Enable branch deployments on the lower environments only.
+environment_configs = [
+    EnvironmentConfig(name="test", account_id="987654321012", enable_branch_deploy=True),
+    EnvironmentConfig(name="production", account_id="123456789012", enable_branch_deploy=False),
+]
 ```
 
-6. Run `uv run projen` to generate the github actions workflow files.
+5. Run `uv run projen` to generate the GitHub Actions workflow files.
 
-7. AWS CLI Authentication: Ensure you're logged into an AWS Account (one of the ones you configured in step 4) via the AWS CLI. If you haven't set up the AWS CLI, [then follow this guide](https://towardsthecloud.com/set-up-aws-cli-aws-sso))
+6. Log into one of the accounts you set in step 4 with the AWS CLI. If you haven't set that up yet, [follow this guide](https://towardsthecloud.com/set-up-aws-cli-aws-sso).
 
-8. Deploy the CDK toolkit stack to your AWS environment with `cdk bootstrap` if it's not already set up.
+7. Run `uv run cdk bootstrap` if the account doesn't have the CDK toolkit stack yet.
 
-9. Deploy the GitHub OIDC Stack to enable GitHub Actions workflow permissions for AWS deployments. For instance, if you set up a `dev` environment, execute `uv run projen dev:deploy`.
+8. Deploy the FoundationStack to create the GitHub Actions deploy role. For the `test` environment that's `uv run projen test:deploy:all`.
 
-   Local synth resolves your repository's numeric GitHub IDs through `gh api`, so run `gh auth login` first.
+   Synthesizing locally reads your repository's numeric GitHub IDs through `gh api`, so run `gh auth login` first.
 
-10. Opt the repository into immutable OIDC subject claims:
+9. Opt the repository into immutable OIDC subject claims:
 
-    ```bash
-    gh api -X PUT repos/OWNER/REPOSITORY/actions/oidc/customization/sub -F use_default=true -F use_immutable_subject=true
-    ```
+   ```bash
+   gh api -X PUT repos/OWNER/REPOSITORY/actions/oidc/customization/sub -F use_default=true -F use_immutable_subject=true
+   ```
 
-    The deploy role only trusts the immutable claim, so do this after step 9. See [`src/stacks/README.md`](./src/stacks/README.md#github-immutable-oidc-subjects).
+   The deploy role trusts only the immutable claim and there's no fallback to the old one, so do this after step 8, never before. [`src/stacks/README.md`](./src/stacks/README.md#github-immutable-oidc-subjects) explains why.
 
-11. Commit and push your changes to the `main` branch to trigger the CDK deploy pipeline in GitHub.
-
-Congratulations 🎉! You've successfully set up your project.
+10. Push to `main`. The pipeline takes it from there.
 
 ### Project Structure
 
-When working on smaller projects using infrastructure as code, where you deploy single applications that don’t demand extensive maintenance or collaboration from multiple teams, it’s recommended to structure your AWS CDK project in a way that enables you to deploy both the application and infrastructure using a single stack.
+One stack is fine while your app is a single service owned by one team. Put it all in `StarterStack` and move on.
 
-However, as projects evolve to encompass multiple microservices and a variety of stateful resources (e.g., databases), the complexity inherently increases.
+That stops working once you have several services and stateful resources on different lifecycles, because every deploy then touches everything, including the database you'd rather nobody touched.
 
-In such cases, adopting a more sophisticated AWS CDK project organization becomes critical. This ensures not only the ease of extensibility but also the smooth deployment of each component, thereby supporting a more robust development lifecycle and facilitating greater operational efficiency.
-
-To cater to these advanced needs, your AWS CDK project should adopt a modular structure. This is where the **AWS CDK Python Starter Kit** shines ✨.
-
-Here’s a closer look at how this structure enhances maintainability and scalability:
+So this kit splits the app along the seams that change independently:
 
 ```bash
 .
@@ -142,6 +138,12 @@ Here’s a closer look at how this structure enhances maintainability and scalab
 │  │  └── lambda
 │  │     └── hello-world
 │  │        └── lambda_function.py
+│  ├── aspects
+│  │  ├── __init__.py
+│  │  ├── permission_boundary_aspect.py
+│  │  ├── s3_aspect.py
+│  │  ├── vpc_aspect.py
+│  │  └── README.md
 │  ├── bin
 │  │  ├── cicd_helper.py
 │  │  ├── env_helper.py
@@ -149,38 +151,61 @@ Here’s a closer look at how this structure enhances maintainability and scalab
 │  ├── custom_constructs
 │  │  ├── __init__.py
 │  │  ├── base_construct.py
+│  │  ├── github_actions_oidc_construct.py
 │  │  ├── network_construct.py
 │  │  └── README.md
 │  └── stacks
 │     ├── __init__.py
-│     ├── base_stack.py
-│     ├── github_oidc_stack.py
+│     ├── foundation_stack.py
+│     ├── starter_stack.py
 │     └── README.md
 └── tests
    ├── __init__.py
-   ├── test_example.py
-   ├── test_git_helper.py
-   └── test_github_oidc_stack.py
+   ├── test_aspects.py
+   ├── test_env_helper.py
+   ├── test_foundation_stack.py
+   └── test_git_helper.py
 ```
 
-As you can see in the above tree diagram, the way this project is setup it tries to segment it into logical units, such as **constructs** for reusable infrastructure patterns, **stacks** for deploying groups of resources and **assets** for managing source code of containers and lambda functions.
+Each directory has one job:
 
-Here is a brief explanation of what each section does:
+- `src/aspects`: Rules applied to every construct in a scope, like attaching a permission boundary to each IAM role. The [aspects README](./src/aspects/README.md) covers what each one catches and how to write your own.
+- `src/assets`: Lambda handler code and container Dockerfiles, sitting next to the infrastructure that ships them.
+- `src/bin`: Helpers shared by the CDK app and `.projenrc.py`: resource naming, workflow generation, and resolving this repository's GitHub identity.
+- `src/custom_constructs`: Reusable building blocks you compose into stacks. The [constructs README](./src/custom_constructs/README.md) covers the environment-aware pattern. It's called `custom_constructs` because a directory named `constructs` would shadow the `constructs` package every CDK module imports.
+- `src/stacks`: `FoundationStack` holds the account-level pieces (the deploy role and the toolkit cleaner), and `StarterStack` is where your own resources go. See the [stacks README](./src/stacks/README.md).
+- `src/app.py`: Where the app gets built and the stacks get their names.
+- `tests`: pytest tests. `uv run projen test` runs them together with Ruff and ty.
 
-- `src/assets`: Organizes the assets for your Lambda functions and ECS services, ensuring that the application code is neatly encapsulated with the infrastructure code.
-- `src/bin`: Contains utility scripts (e.g., `cicd_helper.py`, `env_helper.py`, `git_helper.py`) that streamline environment setup and integration with CI/CD pipelines.
-- `src/custom_constructs`: Houses the core building blocks of your infrastructure. These constructs can be composed into higher-level abstractions, promoting reusability across different parts of your infrastructure. Check out the [README in the constructs folder](./src/custom_constructs/README.md) to read how you can utilize environment-aware configurations.
-- `src/stacks`: Dedicated to defining stacks that represent collections of AWS resources (constructs). This allows for logical grouping of related resources, making it simpler to manage deployments and resource dependencies. Check out the [README in the stacks folder](./src/stacks/README.md) to read how you can instantiate new stacks.
-- `src/lib/main.ts`: This is where the CDK app is instantiated.
-- `test`: Is the location to store your unit or integration tests (powered by jest)
+### Branch-based Deployments
+
+Push a feature branch and the `cdk-deploy-test-branch` workflow deploys its own copy of the stacks, named after the branch: `StarterStack-add-api` rather than `StarterStack-test`. Several developers can work against the same AWS account without stepping on each other.
+
+`FoundationStack` is skipped during branch deployments. A feature branch has no business recreating the role its own pipeline assumes.
+
+Deploys and destroys in the `test` environment use CDK express mode, which is meaningfully faster and safe for stacks that only exist for the life of a branch.
+
+Deleting the branch triggers `cdk-destroy-test-branch`, which tears the stacks down. Turn on **"Automatically delete head branches"** in your repository settings so merging a pull request cleans up after itself. `main` and the automation branches are excluded.
+
+The generated projen tasks mirror this:
+
+```bash
+uv run projen test:synth               # synthesize every stack
+uv run projen test:deploy:all          # deploy every stack
+uv run projen test:deploy:stack -- StarterStack-test
+uv run projen test:branch:deploy:all   # deploy this branch's stacks
+uv run projen test:branch:deploy:hotswap  # fast inner loop, branch only
+uv run projen test:branch:destroy:all
+uv run projen test:ls
+```
 
 ### AWS CDK Starter Kit for TypeScript Users
 
-> **Looking for the TypeScript version of this AWS CDK Starter Kit?** Check out the [AWS CDK Starter Kit](https://github.com/towardsthecloud/aws-cdk-starter-kit) for a tailored experience that leverages the full power of AWS CDK with TypeScript.
+> Prefer TypeScript? The [AWS CDK Starter Kit](https://github.com/towardsthecloud/aws-cdk-starter-kit) is the same setup, written in TypeScript.
 
 ### Acknowledgements
 
-A heartfelt thank you to the creators of [projen](https://github.com/projen/projen). This starter kit stands on the shoulders of giants, made possible by their pioneering work in simplifying cloud infrastructure projects!
+Thanks to the [projen](https://github.com/projen/projen) team. Every workflow, task and config file in this repo is generated, and none of it would exist without their work.
 
 ### Author
 
