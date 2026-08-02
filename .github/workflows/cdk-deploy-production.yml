@@ -22,31 +22,24 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout repository
-        id: checkout_repository
         uses: actions/checkout@v6
       - name: Setup python environment
-        id: setup_python_environment
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Setup uv
-        id: setup_uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
       - name: Configure AWS credentials
-        id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsServiceRole
           aws-region: us-east-1
       - name: Install dependencies
-        id: install_dependencies
         run: uv sync --frozen
       - name: Run CDK synth for the PRODUCTION environment
-        id: run_cdk_synth_for_the_production_environment
         run: uv run projen production:synth
       - name: Deploy CDK to the PRODUCTION environment on AWS account 123456789012
-        id: deploy_cdk_to_the_production_environment_on_aws_account_123456789012
         run: uv run projen production:deploy:all

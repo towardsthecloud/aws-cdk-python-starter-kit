@@ -15,27 +15,22 @@ jobs:
       CI: "true"
     steps:
       - name: Checkout repository
-        id: checkout_repository
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Setup python environment
-        id: setup_python_environment
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Setup uv
-        id: setup_uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
       - name: Install dependencies
-        id: install_dependencies
         run: uv sync
       - name: build
-        id: build
         run: uv run projen build
       - name: Find mutations
         id: self_mutation
@@ -44,7 +39,6 @@ jobs:
           git diff --staged --patch --exit-code > repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
         shell: bash
       - name: Upload patch
-        id: upload_patch
         if: steps.self_mutation.outputs.self_mutation_happened
         uses: actions/upload-artifact@v7
         with:
@@ -52,7 +46,6 @@ jobs:
           path: repo.patch
           overwrite: true
       - name: Fail build on mutation
-        id: fail_build_on_mutation
         if: steps.self_mutation.outputs.self_mutation_happened
         run: |-
           echo "::error::Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch."
@@ -66,28 +59,23 @@ jobs:
     if: always() && needs.build.outputs.self_mutation_happened && !(github.event.pull_request.head.repo.full_name != github.repository)
     steps:
       - name: Checkout repository
-        id: checkout_repository
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Download patch
-        id: download_patch
         uses: actions/download-artifact@v8
         with:
           name: repo.patch
           path: ${{ runner.temp }}
       - name: Apply patch
-        id: apply_patch
         run: '[ -s ${{ runner.temp }}/repo.patch ] && git apply ${{ runner.temp }}/repo.patch || echo "Empty patch. Skipping."'
       - name: Set git identity
-        id: set_git_identity
         run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Push changes
-        id: push_changes
         env:
           PULL_REQUEST_REF: ${{ github.event.pull_request.head.ref }}
         run: |-

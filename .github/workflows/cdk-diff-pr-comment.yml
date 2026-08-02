@@ -17,35 +17,28 @@ jobs:
       AWS_REGION: us-east-1
     steps:
       - name: Checkout repository
-        id: checkout_repository
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Setup python environment
-        id: setup_python_environment
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Setup uv
-        id: setup_uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
       - name: Configure AWS credentials
-        id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsServiceRole
           aws-region: us-east-1
       - name: Install dependencies
-        id: install_dependencies
         run: uv sync --frozen
       - name: CDK diff and notify PR
-        id: cdk_diff_and_notify_pr
         run: uv run projen production:diff:all > cdk-diff-output.txt 2>&1 || true
       - name: Post CDK Diff Comment in PR
-        id: post_cdk_diff_comment_in_pr
         uses: towardsthecloud/aws-cdk-diff-pr-commenter@v1
         with:
           diff-file: cdk-diff-output.txt

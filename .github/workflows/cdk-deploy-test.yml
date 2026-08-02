@@ -19,31 +19,24 @@ jobs:
     environment: test
     steps:
       - name: Checkout repository
-        id: checkout_repository
         uses: actions/checkout@v6
       - name: Setup python environment
-        id: setup_python_environment
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Setup uv
-        id: setup_uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
       - name: Configure AWS credentials
-        id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::987654321012:role/GitHubActionsServiceRole
           aws-region: us-east-1
       - name: Install dependencies
-        id: install_dependencies
         run: uv sync --frozen
       - name: Run CDK synth for the TEST environment
-        id: run_cdk_synth_for_the_test_environment
         run: uv run projen test:synth
       - name: Deploy CDK to the TEST environment on AWS account 987654321012
-        id: deploy_cdk_to_the_test_environment_on_aws_account_987654321012
         run: uv run projen test:deploy:all

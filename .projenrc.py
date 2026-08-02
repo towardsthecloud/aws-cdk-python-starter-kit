@@ -62,13 +62,13 @@ project = AwsCdkPythonApp(
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["cloudstructs"],  # Runtime dependencies of this module
     dev_deps=[
-        "projen@0.99.62",
+        "projen@0.101.20",
         "ruff",
         "ty",
         f"aws-cdk-cli@{cdk_cli_version}",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
     pytest_options={
-        "version": "9.0.3"
+        "version": "9.1.1"
     },  # Find the latest pytest version here: https://pypi.org/project/pytest/
     context={
         "cli-telemetry": False,  # Disable AWS CDK CLI telemetry, see: https://github.com/aws/aws-cdk/issues/34892
