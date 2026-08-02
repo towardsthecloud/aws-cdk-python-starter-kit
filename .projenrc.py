@@ -31,6 +31,13 @@ python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
 # ships the same CLI as the npm one, so no workflow needs Node.js installed separately.
 cdk_cli_version = "2.1134.0"  # Find the latest CDK CLI version here: https://pypi.org/project/aws-cdk-cli/
 
+# Packages whose versions this file pins. Dependabot ignores them because the next synth would
+# revert its bump, and the minimum-release-age gate exempts them because the pin is deliberate.
+PINNED_PACKAGES = ["aws-cdk-lib", "aws-cdk-cli", "projen", "pytest"]
+
+# Ignore releases younger than this when resolving. Matches the TypeScript kit's pnpm setting.
+MINIMUM_RELEASE_AGE_DAYS = 7
+
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
 aws_region = os.getenv("AWS_REGION", "us-east-1")
@@ -92,9 +99,6 @@ project = AwsCdkPythonApp(
             },
         },
     },
-    auto_approve_options={
-        "allowed_usernames": ["dependabot", "dependabot[bot]"],
-    },
     git_ignore_options={
         "ignore_patterns": [
             "__pycache__",
@@ -142,6 +146,19 @@ project.test_task.spawn(typecheck_task)
 pyproject = project.try_find_object_file("pyproject.toml")
 if pyproject:
     pyproject.add_override("tool.pytest.ini_options.pythonpath", [python_module_name])
+    # Ignore anything published in the last 7 days when resolving, so a compromised or broken
+    # release has time to be caught and yanked before it can reach this project. The uv
+    # equivalent of the TypeScript kit's pnpm minimumReleaseAge. It takes a rolling duration,
+    # so it needs no maintenance. Resolution only happens on `uv lock`; `uv sync --frozen`
+    # installs exactly what the lockfile pins and is unaffected.
+    pyproject.add_override("tool.uv.exclude-newer", f"{MINIMUM_RELEASE_AGE_DAYS} days")
+    # The versions pinned above are a deliberate choice, so the age gate must not veto them:
+    # pin a CDK release on its publication day and resolution would otherwise fail outright.
+    # "0 days" means no age restriction for that package.
+    pyproject.add_override(
+        "tool.uv.exclude-newer-package",
+        {name: "0 days" for name in PINNED_PACKAGES},
+    )
 
 # Add VSCode extensions recommendation
 JsonFile(
@@ -164,42 +181,20 @@ YamlFile(
                 "package-ecosystem": "uv",
                 "directory": "/",
                 "schedule": {"interval": "weekly"},
-                "ignore": [
-                    {"dependency-name": "aws-cdk-lib"},
-                    {"dependency-name": "aws-cdk"},
-                    {"dependency-name": "projen"},
-                ],
-                "labels": ["dependencies", "auto-approve"],
+                # projen pins these in this file, so a Dependabot bump would be
+                # reverted by the next synth.
+                "ignore": [{"dependency-name": name} for name in PINNED_PACKAGES],
+                "labels": ["dependencies"],
                 "groups": {
                     "default": {
                         "patterns": ["*"],
-                        "exclude-patterns": ["aws-cdk*", "projen"],
+                        "exclude-patterns": PINNED_PACKAGES,
                     }
                 },
             }
         ],
     },
 )
-
-# Add auto-merge step to the auto-approve workflow
-auto_approve_workflow = project.try_find_object_file(
-    ".github/workflows/auto-approve.yml"
-)
-if auto_approve_workflow:
-    auto_approve_workflow.add_override("jobs.approve.permissions.contents", "write")
-    # Add checkout step before the merge step
-    auto_approve_workflow.add_override(
-        "jobs.approve.steps.1",
-        {"name": "Checkout", "uses": "actions/checkout@v6"},
-    )
-    auto_approve_workflow.add_override(
-        "jobs.approve.steps.2",
-        {
-            "name": "Enable Pull Request Automerge",
-            "run": 'gh pr merge --merge --auto "${{ github.event.pull_request.number }}"',
-            "env": {"GH_TOKEN": "${{ secrets.PROJEN_GITHUB_TOKEN }}"},
-        },
-    )
 
 # Defines the environment configurations for the CDK application.
 # The order of this list is the deployment order in the pipeline: each environment's workflow

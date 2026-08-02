@@ -2,7 +2,6 @@
   "files": [
     ".gitattributes",
     ".github/dependabot.yml",
-    ".github/workflows/auto-approve.yml",
     ".github/workflows/build.yml",
     ".github/workflows/cdk-deploy-production.yml",
     ".github/workflows/cdk-deploy-test-branch.yml",

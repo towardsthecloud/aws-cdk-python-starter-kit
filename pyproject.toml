@@ -27,3 +27,12 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = [ "src" ]
+
+[tool.uv]
+exclude-newer = "7 days"
+
+  [tool.uv.exclude-newer-package]
+  aws-cdk-lib = "0 days"
+  aws-cdk-cli = "0 days"
+  projen = "0 days"
+  pytest = "0 days"

@@ -8,15 +8,17 @@ updates:
       interval: weekly
     ignore:
       - dependency-name: aws-cdk-lib
-      - dependency-name: aws-cdk
+      - dependency-name: aws-cdk-cli
       - dependency-name: projen
+      - dependency-name: pytest
     labels:
       - dependencies
-      - auto-approve
     groups:
       default:
         patterns:
           - "*"
         exclude-patterns:
-          - aws-cdk*
+          - aws-cdk-lib
+          - aws-cdk-cli
           - projen
+          - pytest

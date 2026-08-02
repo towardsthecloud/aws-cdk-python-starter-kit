@@ -15,7 +15,7 @@ Production-ready AWS CDK Python starter kit template with secure OIDC authentica
 - **💬 Automated CDK Diff on PRs**: [CDK diff outputs](https://github.com/marketplace/actions/aws-cdk-diff-pr-commenter) are automatically posted to your pull requests for easy infrastructure change reviews
 - **💻 Branch-based Deployments**: Deploy multiple CDK stacks to the same AWS environments based on Git branch for an improved multi-developer workflow. Ephemeral environment deploys and destroys use CDK express mode, so they can run [up to 4x faster than normal deploys](https://aws.amazon.com/about-aws/whats-new/2026/06/aws-cloudformation-cdk/). Enable **"Automatically delete head branches"** in your repo settings so merged branch stacks are cleaned up automatically via the destroy workflow
 - **🧹 Reusable CDK Aspects**: Ship-ready [aspects](./src/aspects/README.md) that enforce permission boundaries, S3 encryption, public-access blocking and RFC 1918 VPC ranges across every stack
-- **📦 Automated Dependency Management**: Dependabot opens grouped upgrade PRs for uv, with auto-approve and auto-merge once checks pass
+- **📦 Reviewed Dependency Updates**: Dependabot opens grouped weekly upgrade PRs for uv. Nothing merges itself, and uv ignores any release younger than 7 days when resolving, so a compromised or broken publish has time to be caught and yanked before it can reach your lockfile
 
 <!-- TIP-LIST:START -->
 > [!TIP]
