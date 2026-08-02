@@ -5,11 +5,16 @@ import os
 if os.path.isdir(".venv"):
     os.environ["PROJEN_DISABLE_POST"] = "true"
 
-from projen import YamlFile
+from projen import JsonFile, YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
-from src.bin.cicd_helper import github_cicd
-from src.bin.env_helper import cdk_action_task
+from src.bin.cicd_helper import (
+    create_build_workflow,
+    create_cdk_deployment_workflows,
+    create_cdk_diff_pr_workflow,
+    create_release_workflow,
+)
+from src.bin.env_helper import EnvironmentConfig, add_cdk_action_task
 
 # Define the python module name and set the python version
 project_name = "aws-cdk-python-starter-kit"
@@ -18,30 +23,43 @@ python_version = "3.13"
 python_major, python_minor = map(int, python_version.split("."))
 python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
 
+# Pin the CDK CLI so local runs, CI and the lockfile agree on one version. The PyPI package
+# ships the same CLI as the npm one, so no workflow needs Node.js installed separately.
+cdk_cli_version = "2.1134.0"  # Find the latest CDK CLI version here: https://pypi.org/project/aws-cdk-cli/
+
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
 aws_region = os.getenv("AWS_REGION", "us-east-1")
+
+# Name of the GitHub deploy role created by the FoundationStack. Set as an environment variable
+# for the projen tasks so the CDK app and the workflows agree on one name.
+github_role = "GitHubActionsServiceRole"
 
 project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
     cdk_version_pinning=True,
     cdk_version="2.263.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1134.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
+    cdk_cli_version=cdk_cli_version,
     module_name=python_module_name,
     name=project_name,
     projen_command="uv run projen",
     description="Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!",
     version="2.101.0",
     app_entrypoint=f"{python_module_name}/app.py",
+    deps=["cloudstructs"],  # Runtime dependencies of this module
     dev_deps=[
         "projen@0.101.23",
         "ruff",
         "ty",
+        f"aws-cdk-cli@{cdk_cli_version}",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
     pytest_options={
         "version": "9.1.1"
     },  # Find the latest pytest version here: https://pypi.org/project/pytest/
+    context={
+        "cli-telemetry": False,  # Disable AWS CDK CLI telemetry, see: https://github.com/aws/aws-cdk/issues/34892
+    },
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
@@ -51,6 +69,7 @@ project = AwsCdkPythonApp(
         },
     },
     github_options={
+        "mergify": False,
         "pull_request_lint_options": {
             "semantic_title_options": {
                 "types": [
@@ -77,9 +96,11 @@ project = AwsCdkPythonApp(
             "__pycache__/",
             ".python-version",
             ".DS_Store",
+            ".env",
             ".mypy_cache",
             ".pytest_cache",
             ".Python",
+            ".ruff_cache",
             ".venv/",
             "*.pyc",
             "venv/",
@@ -91,6 +112,25 @@ project = AwsCdkPythonApp(
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
 
+# Add a lint task and wire both linters into `test`, so CI fails on a lint or type error
+# instead of only on a failing assertion.
+lint_task = project.add_task(
+    "lint",
+    description="Lint and auto-fix the codebase using Ruff",
+    receive_args=True,
+)
+lint_task.exec("ruff check --fix")
+lint_task.exec("ruff format")
+
+typecheck_task = project.add_task(
+    "typecheck",
+    description="Type check the codebase using ty",
+    exec="ty check src tests",
+)
+
+project.test_task.spawn(lint_task)
+project.test_task.spawn(typecheck_task)
+
 # The CDK app entrypoint lives in `src`, so Python puts that directory on sys.path and the
 # modules import each other as `stacks.x` and `bin.y`. pytest collects from the repository
 # root instead, so give it the same import root or every test module fails to collect.
@@ -98,13 +138,13 @@ pyproject = project.try_find_object_file("pyproject.toml")
 if pyproject:
     pyproject.add_override("tool.pytest.ini_options.pythonpath", [python_module_name])
 
-# Define the target AWS accounts for the different environments
-target_accounts = {
-    "dev": "987654321012",
-    "test": "123456789012",
-    "staging": None,
-    "production": None,
-}
+# Add VSCode extensions recommendation
+JsonFile(
+    project,
+    ".vscode/extensions.json",
+    obj={"recommendations": ["dannysteenman.aws-cdk-extension-pack"]},
+    marker=False,
+)
 
 gh = project.github
 
@@ -145,7 +185,7 @@ if auto_approve_workflow:
     # Add checkout step before the merge step
     auto_approve_workflow.add_override(
         "jobs.approve.steps.1",
-        {"name": "Checkout", "uses": "actions/checkout@v5"},
+        {"name": "Checkout", "uses": "actions/checkout@v6"},
     )
     auto_approve_workflow.add_override(
         "jobs.approve.steps.2",
@@ -156,19 +196,71 @@ if auto_approve_workflow:
         },
     )
 
-# Loop through each environment in target_accounts
-for env, account in target_accounts.items():
-    if account:  # Check if account is not None
-        # Adds customized projen tasks for executing cdk actions for each environment
-        cdk_action_task(
+# Defines the environment configurations for the CDK application.
+# The order of this list is the deployment order in the pipeline: each environment's workflow
+# is chained onto the completion of the previous one, so `production` only runs after `test`
+# succeeded. Enable branch deployments on the lower environments only.
+environment_configs = [
+    EnvironmentConfig(
+        name="test", account_id="987654321012", enable_branch_deploy=True
+    ),
+    EnvironmentConfig(
+        name="production", account_id="123456789012", enable_branch_deploy=False
+    ),
+]
+
+if gh:
+    ordered_environments = [config.name for config in environment_configs]
+
+    # Lint, type check, test and synth on every pull request
+    create_build_workflow(gh, python_version)
+
+    # Tag and publish a GitHub release when the project version changes on main
+    create_release_workflow(gh, python_version)
+
+    for config in environment_configs:
+        # Adds `uv run projen` commands for executing cdk synth, diff, deploy, destroy and ls
+        add_cdk_action_task(
             project,
             {
-                "CDK_DEFAULT_ACCOUNT": account,
-                "ENVIRONMENT": env,
+                "CDK_DEFAULT_ACCOUNT": config.account_id,
+                "CDK_DEFAULT_REGION": aws_region,
+                "ENVIRONMENT": config.name,
+                "GITHUB_DEPLOY_ROLE": github_role,
             },
         )
 
+        # If branch deployment is enabled for this environment, add the GIT_BRANCH_REF tasks
+        if config.enable_branch_deploy:
+            add_cdk_action_task(
+                project,
+                {
+                    "CDK_DEFAULT_ACCOUNT": config.account_id,
+                    "CDK_DEFAULT_REGION": aws_region,
+                    "ENVIRONMENT": config.name,
+                    "GITHUB_DEPLOY_ROLE": github_role,
+                    "GIT_BRANCH_REF": "$(echo ${GIT_BRANCH_REF:-$(git rev-parse --abbrev-ref HEAD)})",
+                },
+            )
+
         # Adds GitHub action workflows for deploying the CDK stacks to the target AWS account
-        github_cicd(gh, account, env, python_version, aws_region)
+        create_cdk_deployment_workflows(
+            gh,
+            config,
+            aws_region,
+            github_role,
+            python_version,
+            ordered_environments,
+        )
+
+    # Create the CDK diff PR workflow once, against the environment deployed last
+    create_cdk_diff_pr_workflow(
+        gh,
+        environment_configs[-1].account_id,
+        aws_region,
+        github_role,
+        python_version,
+        ordered_environments,
+    )
 
 project.synth()

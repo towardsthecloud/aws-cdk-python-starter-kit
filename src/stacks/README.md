@@ -1,53 +1,63 @@
-# AWS CDK Stacks: BaseStack and GitHubOIDCStack
+# AWS CDK Stacks: StarterStack and FoundationStack
 
-This documentation details the structure and functionality of two pivotal stacks within our AWS CDK TypeScript project: `BaseStack` and `GitHubOIDCStack`. These stacks lay the groundwork for deploying AWS resources with specific configurations and capabilities, tailored to different deployment stages and integration with GitHub Actions for CI/CD processes.
+Two stacks ship with this kit. `FoundationStack` holds the account-level plumbing your pipeline needs, and `StarterStack` is where your own infrastructure goes.
 
-## BaseStack
+Both are instantiated in [`app.py`](../app.py) with a name from `create_env_resource_name`, so a `test` deployment produces `StarterStack-test` and a branch deployment produces `StarterStack-add-api`.
 
-The `BaseStack` serves as a foundational stack that you can use to start instantiation your custom and cdk-lib constructs.
+## StarterStack
+
+The starting point for your own resources. Add constructs in the constructor, and add another stack next to this one once a group of resources grows its own lifecycle.
 
 ### Properties
 
-- `environment`: Optional. Specifies the deployment stage (e.g., `dev`, `test`, `staging`, `production`). It's crucial for tailoring the stack configuration to the target environment.
+- `environment`: Optional. The deployment stage (`test`, `production`, and so on).
 
 ### Example Usage
 
 ```python
-import os
+from aws_cdk import aws_s3 as s3
 
-import aws_cdk as cdk
-from stacks.base_stack import BaseStack
-
-# Inherit environment variables from npm run commands (displayed in .projen/tasks.json)
-environment = os.environ.get("ENVIRONMENT", "dev")
-aws_environment = cdk.Environment(account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION"))
-
-# Instantiate the CDK app
-app = cdk.App()
-
-BaseStack(app, f"BaseStack-{environment}", env=aws_environment)
+# In the constructor:
+s3.Bucket(
+    self,
+    "MyBucket",
+    versioned=True,
+    encryption=s3.BucketEncryption.S3_MANAGED,
+)
 ```
 
-## GitHubOIDCStack
+## FoundationStack
 
-The GitHubOIDCStack is designed to facilitate secure CI/CD workflows by integrating AWS resources with GitHub Actions via OpenID Connect (OIDC). This allows for a more secure and streamlined deployment process directly from GitHub Actions.
+Account-level infrastructure that everything else depends on. Deploy it once per AWS account.
+
+`app.py` skips it during branch deployments: a feature branch has no business recreating the role its own pipeline assumes.
 
 ### Features
 
-- GitHub Actions OIDC Provider: Imports the account's OIDC provider for `token.actions.githubusercontent.com`, the trust anchor between GitHub and AWS. AWS allows one provider per issuer URL per account, so the stack references it instead of creating it.
-- GitHub Deploy Role: Creates an IAM role with AdministratorAccess managed policy. This role is assumable by GitHub Actions workflows, granting them the permissions needed to deploy resources.
+- **GitHub Actions OIDC provider**: imports the account's provider for `token.actions.githubusercontent.com`, the trust anchor between GitHub and AWS. AWS allows one provider per issuer URL per account, so the stack references it rather than creating it.
+- **GitHub deploy role**: an IAM role with the AdministratorAccess managed policy, assumable from GitHub Actions through OIDC.
+- **CDK toolkit cleaner**: deletes CDK asset objects and images no deployed stack references any more. Without it the staging bucket and ECR repository grow with every deployment.
+
+### Properties
+
+- `environment`: Required. The deployment stage, which also names the GitHub environment the deploy role trusts.
+- `additional_repositories`: Optional. Other repositories under the same owner allowed to assume the role. Each needs its name and numeric GitHub ID, read with `gh api repos/OWNER/NAME --jq .id`. The ID is checked in rather than looked up during synth, because a lookup would hand every synthesizing CI job a token able to read the other repository.
+- `max_session_duration`: Optional. How long an assumed session lasts. Defaults to 2 hours.
+- `role_name`: Optional. Defaults to `GITHUB_DEPLOY_ROLE`, then `GitHubActionsServiceRole`.
 
 ### GitHub immutable OIDC subjects
 
 The deploy role trusts GitHub's immutable subject claim:
 
 ```text
-repo:OWNER@OWNER-ID/REPOSITORY@REPOSITORY-ID:*
+repo:OWNER@OWNER-ID/REPOSITORY@REPOSITORY-ID:environment:ENVIRONMENT
 ```
 
 The numeric IDs pin the trust to one repository. Rename it, delete and recreate it, or transfer it to another owner, and the old trust no longer matches.
 
-Your repository has to emit that claim. Opt in through the API, then check it took:
+The `environment:` segment means a workflow job must declare a matching `environment:` to get a credential. The generated deploy workflows already do.
+
+Your repository has to emit the immutable claim. Opt in through the API, then check it took:
 
 ```bash
 gh api -X PUT repos/OWNER/REPOSITORY/actions/oidc/customization/sub -F use_default=true -F use_immutable_subject=true
@@ -58,38 +68,26 @@ Deploy the stack first, then flip the setting. There's no fallback to the legacy
 
 Synthesis resolves your repository's IDs on its own. GitHub Actions passes them in `GITHUB_REPOSITORY_ID` and `GITHUB_REPOSITORY_OWNER_ID`, so no workflow needs a token. Local synth reads the `origin` remote and calls `gh api`, so run `gh auth login` once.
 
-### Configuration
-
-Both arguments are optional:
-
-- `additional_repositories`: other repositories under the same owner allowed to assume the role. Each needs its name and numeric GitHub ID, read with `gh api repos/OWNER/NAME --jq .id`. The ID is checked in rather than looked up during synth, because a lookup would hand every synthesizing CI job a token able to read the other repository.
-- `subject_context`: the part of the subject after the repository. Defaults to `*`, which trusts every ref. Narrow it to `environment:production` once the deploy workflows declare a GitHub environment.
-
-```python
-from bin.git_helper import GitHubRepositoryReference
-
-GitHubOIDCStack(
-    app,
-    f"GitHubOIDCStack-{environment}",
-    env=aws_environment,
-    additional_repositories=[GitHubRepositoryReference(name="my-cdk-app", id="123456789")],
-)
-```
-
 ### Example Usage
 
 ```python
 import os
 
 import aws_cdk as cdk
-from stacks.github_oidc_stack import GitHubOIDCStack
+from bin.env_helper import create_env_resource_name
+from bin.git_helper import GitHubRepositoryReference
+from stacks.foundation_stack import FoundationStack
 
-# Inherit environment variables from npm run commands (displayed in .projen/tasks.json)
 environment = os.environ.get("ENVIRONMENT", "dev")
 aws_environment = cdk.Environment(account=os.getenv("CDK_DEFAULT_ACCOUNT"), region=os.getenv("CDK_DEFAULT_REGION"))
 
-# Instantiate the CDK app
 app = cdk.App()
 
-GitHubOIDCStack(app, f"GitHubOIDCStack-{environment}", env=aws_environment)
+FoundationStack(
+    app,
+    create_env_resource_name("FoundationStack"),
+    environment=environment,
+    env=aws_environment,
+    additional_repositories=[GitHubRepositoryReference(name="my-cdk-app", id="123456789")],
+)
 ```

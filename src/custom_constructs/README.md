@@ -1,4 +1,4 @@
-# AWS CDK Constructs: BaseConstruct and NetworkConstruct
+# AWS CDK Constructs: BaseConstruct, GitHubActionsOidcConstruct and NetworkConstruct
 
 This README provides a comprehensive guide to understanding and utilizing the `BaseConstruct` and `NetworkConstruct` within your AWS CDK project, emphasizing the importance of environment-aware configurations.
 
@@ -58,4 +58,18 @@ class MyStack(cdk.Stack):
         super().__init__(scope, id, **kwargs)
 
         NetworkConstruct(self, "NetworkConstruct")
+```
+
+## GitHubActionsOidcConstruct
+
+Creates the IAM role that GitHub Actions workflows assume to deploy, trusting GitHub's immutable repository subject claim. `FoundationStack` instantiates it, so you rarely need it directly; reach for it when you want the deploy role in a stack of your own.
+
+The account's OIDC provider for `token.actions.githubusercontent.com` is imported rather than created, because AWS allows one provider per issuer URL per account.
+
+See the [stacks README](../stacks/README.md#github-immutable-oidc-subjects) for the subject format, how the repository identity is resolved, and the cutover steps.
+
+```python
+from custom_constructs.github_actions_oidc_construct import GitHubActionsOidcConstruct
+
+GitHubActionsOidcConstruct(self, "GitHubActionsOidc", environment="production")
 ```

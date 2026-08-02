@@ -1,6 +1,11 @@
 {
   "dependencies": [
     {
+      "name": "aws-cdk-cli",
+      "version": "2.1134.0",
+      "type": "devenv"
+    },
+    {
       "name": "projen",
       "version": "0.101.23",
       "type": "devenv"
@@ -16,6 +21,10 @@
     {
       "name": "aws-cdk-lib",
       "version": "2.263.0",
+      "type": "runtime"
+    },
+    {
+      "name": "cloudstructs",
       "type": "runtime"
     },
     {

@@ -4,6 +4,7 @@ __pycache__
 .DS_Store
 .mypy_cache
 .pytest_cache
+.ruff_cache
 .venv/
 *.pyc
 node_modules/
@@ -92,7 +93,13 @@ cython_debug/
 !/cdk.json
 /cdk.out/
 .cdk.staging/
+!/.vscode/extensions.json
 !/.github/dependabot.yml
-!/.github/workflows/cdk-deploy-dev.yml
+!/.github/workflows/build.yml
+!/.github/workflows/release.yml
 !/.github/workflows/cdk-deploy-test.yml
+!/.github/workflows/cdk-deploy-test-branch.yml
+!/.github/workflows/cdk-destroy-test-branch.yml
+!/.github/workflows/cdk-deploy-production.yml
+!/.github/workflows/cdk-diff-pr-comment.yml
 !/.projenrc.py

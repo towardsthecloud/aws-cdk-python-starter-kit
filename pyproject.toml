@@ -6,14 +6,24 @@ version = "2.101.0"
 description = "Create and deploy an AWS CDK app on your AWS account in less than 5 minutes using GitHub actions!"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
-dependencies = [ "aws-cdk-lib==2.263.0", "constructs>=10.5.1,<11.0.0" ]
+dependencies = [
+  "aws-cdk-lib==2.263.0",
+  "cloudstructs",
+  "constructs>=10.5.1,<11.0.0"
+]
 
   [[project.authors]]
   name = "Danny Steenman"
   email = "danny@towardsthecloud.com"
 
 [dependency-groups]
-dev = [ "projen==0.101.23", "ruff", "ty", "pytest==9.1.1" ]
+dev = [
+  "aws-cdk-cli==2.1134.0",
+  "projen==0.101.23",
+  "ruff",
+  "ty",
+  "pytest==9.1.1"
+]
 
 [tool.pytest.ini_options]
 pythonpath = [ "src" ]

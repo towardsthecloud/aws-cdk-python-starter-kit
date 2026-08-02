@@ -1,4 +1,4 @@
-from .base_stack import BaseStack
-from .github_oidc_stack import GitHubOIDCStack
+from .foundation_stack import FoundationStack
+from .starter_stack import StarterStack
 
-__all__ = ["BaseStack", "GitHubOIDCStack"]
+__all__ = ["FoundationStack", "StarterStack"]

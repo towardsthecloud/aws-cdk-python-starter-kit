@@ -1,5 +1,8 @@
 {
   "app": "python src/app.py",
+  "context": {
+    "cli-telemetry": false
+  },
   "output": "cdk.out",
   "watch": {
     "include": [
