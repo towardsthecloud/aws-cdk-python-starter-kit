@@ -255,9 +255,6 @@
     "test": {
       "name": "test",
       "description": "Run tests",
-      "env": {
-        "PYTHONPATH": "src"
-      },
       "steps": [
         {
           "exec": "pytest"

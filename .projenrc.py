@@ -9,7 +9,7 @@ from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
 from src.bin.cicd_helper import github_cicd
-from src.bin.env_helper import cdk_action_task
+from src.bin.env_helper import CDK_VALIDATE_COMMAND, cdk_action_task
 
 # Define the python module name and set the python version
 project_name = "aws-cdk-python-starter-kit"
@@ -95,12 +95,15 @@ project = AwsCdkPythonApp(
 # Set the CDK_DEFAULT_REGION environment variable for the projen tasks,
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
-project.test_task.env("PYTHONPATH", python_module_name)
+
+pyproject = project.try_find_object_file("pyproject.toml")
+if pyproject:
+    pyproject.add_override("tool.pytest.ini_options.pythonpath", [python_module_name])
 
 project.add_task(
     "validate",
     description="Validate the CDK app offline against the default CloudFormation rules",
-    exec="cdk --unstable=validate validate --no-online",
+    exec=f"{CDK_VALIDATE_COMMAND} --no-online",
     receive_args=True,
 )
 
