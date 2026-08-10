@@ -6,11 +6,6 @@
       "type": "devenv"
     },
     {
-      "name": "pytest",
-      "version": "9.0.3",
-      "type": "devenv"
-    },
-    {
       "name": "ruff",
       "type": "devenv"
     },
@@ -34,7 +29,7 @@
     },
     {
       "name": "pytest",
-      "version": "7.4.3",
+      "version": "9.0.3",
       "type": "test"
     }
   ],

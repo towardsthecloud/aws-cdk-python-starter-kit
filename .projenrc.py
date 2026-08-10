@@ -43,10 +43,10 @@ project = AwsCdkPythonApp(
     deps=["aws-cdk-github-oidc"],
     dev_deps=[
         "projen@0.99.62",
-        "pytest@9.0.3",
         "ruff",
         "ty",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
+    pytest_options={"version": "9.0.3"},
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
@@ -95,10 +95,6 @@ project = AwsCdkPythonApp(
 # Set the CDK_DEFAULT_REGION environment variable for the projen tasks,
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
-
-pyproject = project.try_find_object_file("pyproject.toml")
-if pyproject:
-    pyproject.add_override("tool.pytest.ini_options.pythonpath", [python_module_name])
 
 project.add_task(
     "validate",
