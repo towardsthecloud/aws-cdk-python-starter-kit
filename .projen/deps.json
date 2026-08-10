@@ -6,6 +6,11 @@
       "type": "devenv"
     },
     {
+      "name": "pytest",
+      "version": "9.0.3",
+      "type": "devenv"
+    },
+    {
       "name": "ruff",
       "type": "devenv"
     },
@@ -19,7 +24,7 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "2.254.0",
+      "version": "2.263.0",
       "type": "runtime"
     },
     {

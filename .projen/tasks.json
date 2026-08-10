@@ -141,6 +141,20 @@
         }
       ]
     },
+    "dev:validate": {
+      "name": "dev:validate",
+      "description": "Validate the stacks on the DEV account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "987654321012",
+        "ENVIRONMENT": "dev"
+      },
+      "steps": [
+        {
+          "exec": "cdk --unstable=validate validate",
+          "receiveArgs": true
+        }
+      ]
+    },
     "diff": {
       "name": "diff",
       "description": "Diffs the currently deployed app against your code",
@@ -241,6 +255,9 @@
     "test": {
       "name": "test",
       "description": "Run tests",
+      "env": {
+        "PYTHONPATH": "src"
+      },
       "steps": [
         {
           "exec": "pytest"
@@ -296,6 +313,30 @@
       "steps": [
         {
           "exec": "cdk synth"
+        }
+      ]
+    },
+    "test:validate": {
+      "name": "test:validate",
+      "description": "Validate the stacks on the TEST account",
+      "env": {
+        "CDK_DEFAULT_ACCOUNT": "123456789012",
+        "ENVIRONMENT": "test"
+      },
+      "steps": [
+        {
+          "exec": "cdk --unstable=validate validate",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "validate": {
+      "name": "validate",
+      "description": "Validate the CDK app offline against the default CloudFormation rules",
+      "steps": [
+        {
+          "exec": "cdk --unstable=validate validate --no-online",
+          "receiveArgs": true
         }
       ]
     },

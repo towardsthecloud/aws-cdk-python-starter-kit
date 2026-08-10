@@ -1,5 +1,9 @@
 {
   "app": "python src/app.py",
+  "context": {
+    "@aws-cdk/core:annotationsInValidationReport": true,
+    "@aws-cdk/core:validateAgainstDefaultRules": true
+  },
   "output": "cdk.out",
   "watch": {
     "include": [
