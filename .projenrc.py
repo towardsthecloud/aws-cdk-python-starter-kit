@@ -33,6 +33,7 @@ project = AwsCdkPythonApp(
     context={
         "@aws-cdk/core:annotationsInValidationReport": True,
         "@aws-cdk/core:validateAgainstDefaultRules": True,
+        "cli-telemetry": False,
     },
     module_name=python_module_name,
     name=project_name,
@@ -42,7 +43,7 @@ project = AwsCdkPythonApp(
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
     dev_deps=[
-        "projen@0.99.62",
+        "projen@0.101.11",
         "ruff",
         "ty",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/

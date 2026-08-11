@@ -2,7 +2,8 @@
   "app": "python src/app.py",
   "context": {
     "@aws-cdk/core:annotationsInValidationReport": true,
-    "@aws-cdk/core:validateAgainstDefaultRules": true
+    "@aws-cdk/core:validateAgainstDefaultRules": true,
+    "cli-telemetry": false
   },
   "output": "cdk.out",
   "watch": {

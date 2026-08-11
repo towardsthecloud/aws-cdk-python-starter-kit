@@ -112,7 +112,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "projen", specifier = "==0.99.62" },
+    { name = "projen", specifier = "==0.101.11" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "ruff" },
     { name = "ty" },
@@ -200,17 +200,16 @@ wheels = [
 
 [[package]]
 name = "projen"
-version = "0.99.62"
+version = "0.101.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "constructs" },
     { name = "jsii" },
     { name = "publication" },
-    { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/c6/89d291618a10347fee0e6d6de98220c8f7a1ffdf2a82dc52be51fbe89b45/projen-0.99.62.tar.gz", hash = "sha256:b00a56e4b46ad655a3682fa14a875e47d0809f5e7add9aa75712dc0b065af743", size = 4416957, upload-time = "2026-05-18T10:40:26.121Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/71/4be3673189287e80dd9c69858c71b2f6cb6a47877001be05e6222d8499ce/projen-0.101.11.tar.gz", hash = "sha256:4f4fdf92cba4f984065d787e56f831a042003db6dce483082150fa5d5f792e73", size = 5259131, upload-time = "2026-07-10T14:38:34.116Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/95/10a1f64078026c330a23fa596526f2ec102069222d9093994bc16d5eef71/projen-0.99.62-py3-none-any.whl", hash = "sha256:e566c6d73039cc7a140b4a7622f144092019281169a49a69f1d7fe84a0f144ca", size = 4426000, upload-time = "2026-05-18T10:40:22.83Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/0f/9feb085c4e0bfcfe59211a90897eee138124b35544b42ad663fceb0010e8/projen-0.101.11-py3-none-any.whl", hash = "sha256:5b5657bf192e469b08f7fe4597e19623d9fb7103ae1a63ee5e6aef7507acea92", size = 5265790, upload-time = "2026-07-10T14:38:31.108Z" },
 ]
 
 [[package]]
