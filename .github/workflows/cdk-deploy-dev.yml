@@ -31,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: uv sync
       - name: Install cdk cli
-        run: npm install -g aws-cdk
-      - name: Run CDK synth for the DEV environment
-        run: uv run projen dev:synth
+        run: npm install -g aws-cdk@2.1130.0
+      - name: Validate CDK for the DEV environment
+        run: uv run projen dev:validate
       - name: Deploy CDK to the DEV environment on AWS account 987654321012
         run: uv run projen dev:deploy

@@ -9,7 +9,7 @@ from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
 from src.bin.cicd_helper import github_cicd
-from src.bin.env_helper import cdk_action_task
+from src.bin.env_helper import CDK_VALIDATE_COMMAND, cdk_action_task
 
 # Define the python module name and set the python version
 project_name = "aws-cdk-python-starter-kit"
@@ -17,6 +17,8 @@ python_module_name = "src"
 python_version = "3.13"
 python_major, python_minor = map(int, python_version.split("."))
 python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
+cdk_version = "2.263.0"
+cdk_cli_version = "2.1130.0"
 
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
@@ -26,8 +28,13 @@ project = AwsCdkPythonApp(
     author_email="danny@towardsthecloud.com",
     author_name="Danny Steenman",
     cdk_version_pinning=True,
-    cdk_version="2.254.0",  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
-    cdk_cli_version="2.1117.0",  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
+    cdk_version=cdk_version,  # Find the latest CDK version here: https://pypi.org/project/aws-cdk-lib
+    cdk_cli_version=cdk_cli_version,  # Find the latest CDK CLI version https://pypi.org/project/aws-cdk-cli/
+    context={
+        "@aws-cdk/core:annotationsInValidationReport": True,
+        "@aws-cdk/core:validateAgainstDefaultRules": True,
+        "cli-telemetry": False,
+    },
     module_name=python_module_name,
     name=project_name,
     projen_command="uv run projen",
@@ -35,7 +42,12 @@ project = AwsCdkPythonApp(
     version="2.101.0",
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
-    dev_deps=["projen@0.99.62", "ruff", "ty"],  # Find the latest projen version here: https://pypi.org/project/projen/
+    dev_deps=[
+        "projen@0.101.11",
+        "ruff",
+        "ty",
+    ],  # Find the latest projen version here: https://pypi.org/project/projen/
+    pytest_options={"version": "9.0.3"},
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
@@ -47,7 +59,18 @@ project = AwsCdkPythonApp(
     github_options={
         "pull_request_lint_options": {
             "semantic_title_options": {
-                "types": ["feat", "fix", "chore", "refactor", "perf", "docs", "style", "test", "build", "ci"],
+                "types": [
+                    "feat",
+                    "fix",
+                    "chore",
+                    "refactor",
+                    "perf",
+                    "docs",
+                    "style",
+                    "test",
+                    "build",
+                    "ci",
+                ],
             },
         },
     },
@@ -73,6 +96,13 @@ project = AwsCdkPythonApp(
 # Set the CDK_DEFAULT_REGION environment variable for the projen tasks,
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
+
+project.add_task(
+    "validate",
+    description="Validate the CDK app offline against the default CloudFormation rules",
+    exec=f"{CDK_VALIDATE_COMMAND} --no-online",
+    receive_args=True,
+)
 
 # Define the target AWS accounts for the different environments
 target_accounts = {
@@ -113,7 +143,9 @@ YamlFile(
 )
 
 # Add auto-merge step to the auto-approve workflow
-auto_approve_workflow = project.try_find_object_file(".github/workflows/auto-approve.yml")
+auto_approve_workflow = project.try_find_object_file(
+    ".github/workflows/auto-approve.yml"
+)
 if auto_approve_workflow:
     auto_approve_workflow.add_override("jobs.approve.permissions.contents", "write")
     # Add checkout step before the merge step
@@ -143,6 +175,6 @@ for env, account in target_accounts.items():
         )
 
         # Adds GitHub action workflows for deploying the CDK stacks to the target AWS account
-        github_cicd(gh, account, env, python_version, aws_region)
+        github_cicd(gh, account, env, python_version, aws_region, cdk_cli_version)
 
 project.synth()

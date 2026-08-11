@@ -1,10 +1,13 @@
 from projen import github
 
 
-def github_cicd(gh, account, env, python_version, aws_region):
+def github_cicd(gh, account, env, python_version, aws_region, cdk_cli_version):
     # Add a GitHub workflow for deploying the CDK stacks to the AWS account
     cdk_deployment_workflow = github.GithubWorkflow(gh, f"cdk-deploy-{env}")
-    cdk_deployment_workflow.on(push={"branches": ["main"]} if env != "production" else None, workflow_dispatch={})
+    cdk_deployment_workflow.on(
+        push={"branches": ["main"]} if env != "production" else None,
+        workflow_dispatch={},
+    )
 
     cdk_deployment_workflow.add_jobs(
         {
@@ -46,11 +49,11 @@ def github_cicd(gh, account, env, python_version, aws_region):
                     },
                     {
                         "name": "Install cdk cli",
-                        "run": "npm install -g aws-cdk",
+                        "run": f"npm install -g aws-cdk@{cdk_cli_version}",
                     },
                     {
-                        "name": f"Run CDK synth for the {env.upper()} environment",
-                        "run": f"uv run projen {env}:synth",
+                        "name": f"Validate CDK for the {env.upper()} environment",
+                        "run": f"uv run projen {env}:validate",
                     },
                     {
                         "name": f"Deploy CDK to the {env.upper()} environment on AWS account {account}",
