@@ -11,7 +11,7 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
   "aws-cdk-github-oidc",
   "aws-cdk-lib==2.263.0",
-  "constructs>=10.5.1,<11.0.0"
+  "constructs>=10.8.1,<11.0.0"
 ]
 
   [[project.authors]]
@@ -19,4 +19,4 @@ dependencies = [
   email = "danny@towardsthecloud.com"
 
 [dependency-groups]
-dev = [ "projen==0.101.11", "ruff", "ty", "pytest==9.0.3" ]
+dev = [ "projen==0.101.11", "ruff", "ty", "pytest==9.1.1" ]
