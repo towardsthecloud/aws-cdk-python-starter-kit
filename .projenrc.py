@@ -8,7 +8,12 @@ if os.path.isdir(".venv"):
 from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
-from src.bin.cicd_helper import github_cicd
+from src.bin.cicd_helper import (
+    GITHUB_ACTIONS,
+    cdk_validate_workflow,
+    github_cicd,
+    pin_github_actions,
+)
 from src.bin.env_helper import CDK_VALIDATE_COMMAND, cdk_action_task
 
 # Define the python module name and set the python version
@@ -17,8 +22,8 @@ python_module_name = "src"
 python_version = "3.13"
 python_major, python_minor = map(int, python_version.split("."))
 python_requires = f">={python_version},<{python_major}.{python_minor + 1}"
-cdk_version = "2.263.0"
-cdk_cli_version = "2.1130.0"
+cdk_version = "2.267.0"
+cdk_cli_version = "2.1139.0"
 
 # Define the AWS region for the CDK app and github workflows
 # Default to us-east-1 if AWS_REGION is not set in your environment variables
@@ -43,11 +48,11 @@ project = AwsCdkPythonApp(
     app_entrypoint=f"{python_module_name}/app.py",
     deps=["aws-cdk-github-oidc"],
     dev_deps=[
-        "projen@0.101.11",
+        "projen@0.103.7",
         "ruff",
         "ty",
     ],  # Find the latest projen version here: https://pypi.org/project/projen/
-    pytest_options={"version": "9.0.3"},
+    pytest_options={"version": "9.1.1"},
     uv=True,
     uv_options={
         "python_exec": f"python{python_version}",
@@ -97,6 +102,9 @@ project = AwsCdkPythonApp(
 # so the CDK CLI knows which region to use
 project.tasks.add_environment("CDK_DEFAULT_REGION", aws_region)
 
+# Tests import the stacks the same way src/app.py does, so put src on the module path
+project.test_task.env("PYTHONPATH", python_module_name)
+
 project.add_task(
     "validate",
     description="Validate the CDK app offline against the default CloudFormation rules",
@@ -113,6 +121,12 @@ target_accounts = {
 }
 
 gh = project.github
+
+# Keep projen-managed workflows (auto-approve, pull-request-lint) on the same action versions
+pin_github_actions(gh)
+
+# Validate the CDK app offline on every pull request (no AWS credentials required)
+cdk_validate_workflow(gh, python_version, cdk_cli_version)
 
 # Add Dependabot configuration for uv
 YamlFile(
@@ -151,7 +165,11 @@ if auto_approve_workflow:
     # Add checkout step before the merge step
     auto_approve_workflow.add_override(
         "jobs.approve.steps.1",
-        {"name": "Checkout", "uses": "actions/checkout@v5"},
+        {
+            "name": "Checkout",
+            "uses": GITHUB_ACTIONS["checkout"],
+            "with": {"persist-credentials": False},
+        },
     )
     auto_approve_workflow.add_override(
         "jobs.approve.steps.2",
