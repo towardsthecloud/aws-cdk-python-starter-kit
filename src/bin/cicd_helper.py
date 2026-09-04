@@ -24,6 +24,8 @@ def cdk_environment_steps(python_version, cdk_cli_version):
         {
             "name": "Checkout repository",
             "uses": GITHUB_ACTIONS["checkout"],
+            # No job built here pushes to git, so keep the token out of .git/config
+            "with": {"persist-credentials": False},
         },
         {
             "name": "Setup python environment",

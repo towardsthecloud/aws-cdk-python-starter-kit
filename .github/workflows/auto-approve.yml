@@ -25,6 +25,8 @@ jobs:
         run: gh pr review --approve "$PR_NUMBER" --repo "$GH_REPO"
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Enable Pull Request Automerge
         run: gh pr merge --merge --auto "${{ github.event.pull_request.number }}"
         env:

@@ -165,7 +165,11 @@ if auto_approve_workflow:
     # Add checkout step before the merge step
     auto_approve_workflow.add_override(
         "jobs.approve.steps.1",
-        {"name": "Checkout", "uses": GITHUB_ACTIONS["checkout"]},
+        {
+            "name": "Checkout",
+            "uses": GITHUB_ACTIONS["checkout"],
+            "with": {"persist-credentials": False},
+        },
     )
     auto_approve_workflow.add_override(
         "jobs.approve.steps.2",
