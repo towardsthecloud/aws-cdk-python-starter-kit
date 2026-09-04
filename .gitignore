@@ -92,6 +92,7 @@ cython_debug/
 !/cdk.json
 /cdk.out/
 .cdk.staging/
+!/.github/workflows/cdk-validate.yml
 !/.github/dependabot.yml
 !/.github/workflows/cdk-deploy-dev.yml
 !/.github/workflows/cdk-deploy-test.yml

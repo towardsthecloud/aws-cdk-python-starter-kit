@@ -6,6 +6,7 @@
 /.github/workflows/auto-approve.yml linguist-generated
 /.github/workflows/cdk-deploy-dev.yml linguist-generated
 /.github/workflows/cdk-deploy-test.yml linguist-generated
+/.github/workflows/cdk-validate.yml linguist-generated
 /.github/workflows/pull-request-lint.yml linguist-generated
 /.gitignore linguist-generated
 /.projen/** linguist-generated

@@ -5,6 +5,7 @@
     ".github/workflows/auto-approve.yml",
     ".github/workflows/cdk-deploy-dev.yml",
     ".github/workflows/cdk-deploy-test.yml",
+    ".github/workflows/cdk-validate.yml",
     ".github/workflows/pull-request-lint.yml",
     ".gitignore",
     ".projen/deps.json",
