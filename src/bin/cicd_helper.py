@@ -8,7 +8,7 @@ GITHUB_ACTIONS = {
     "configure_aws_credentials": "aws-actions/configure-aws-credentials@v6",
     "semantic_pull_request": "amannn/action-semantic-pull-request@v6",
     "setup_python": "actions/setup-python@v7",
-    "setup_uv": "astral-sh/setup-uv@v10",
+    "setup_uv": "astral-sh/setup-uv@v10.0.1",  # setup-uv publishes no floating v10 tag
 }
 
 
