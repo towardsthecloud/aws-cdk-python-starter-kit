@@ -53,18 +53,17 @@ wheels = [
 
 [[package]]
 name = "aws-cdk-github-oidc"
-version = "4.1.0"
+version = "5.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aws-cdk-lib" },
     { name = "constructs" },
     { name = "jsii" },
     { name = "publication" },
-    { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c3/17/a461c5f4249a1303d98f912991091875af0c9254d07b4e7edb52834c6800/aws_cdk_github_oidc-4.1.0.tar.gz", hash = "sha256:da1d6d02e62d7a7db5d1b0c6e5903a4381533a0b4e96921d6315b8b77917bd93", size = 100389, upload-time = "2026-04-02T14:31:53.803Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/c2/07a25397639fb63187cf887ad82dc877443ca813f55f3feb5d2ff97e8371/aws_cdk_github_oidc-5.2.0.tar.gz", hash = "sha256:c80e00fe80376569b19084c2b43b7d175aa24dca0f961c65fd9326ea3162ae6a", size = 127564, upload-time = "2026-09-23T21:02:23.246Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/42/24bcbd3ed439bd3dd2489eef0f18a1491862397bbe5ee783c2704f52ae2f/aws_cdk_github_oidc-4.1.0-py3-none-any.whl", hash = "sha256:426a37819d3eca75e291f3c112fd18dfb304aef8f90d3fdd73a663225f34e150", size = 98251, upload-time = "2026-04-02T14:31:52.379Z" },
+    { url = "https://files.pythonhosted.org/packages/51/8e/1e844f3dadba30ebe3ac946445ea6030b960beb1d26940872ac950d005f9/aws_cdk_github_oidc-5.2.0-py3-none-any.whl", hash = "sha256:117315439afcc449e655d961168d907f8091c05236314a34fc38f1f6d9c759a2", size = 125598, upload-time = "2026-09-23T21:02:21.711Z" },
 ]
 
 [[package]]
