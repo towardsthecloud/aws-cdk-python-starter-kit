@@ -9,7 +9,6 @@ from projen import YamlFile
 from projen.awscdk import AwsCdkPythonApp
 
 from src.bin.cicd_helper import (
-    GITHUB_ACTIONS,
     cdk_validate_workflow,
     github_cicd,
     pin_github_actions,
@@ -79,9 +78,6 @@ project = AwsCdkPythonApp(
             },
         },
     },
-    auto_approve_options={
-        "allowed_usernames": ["dependabot", "dependabot[bot]"],
-    },
     git_ignore_options={
         "ignore_patterns": [
             "__pycache__",
@@ -122,7 +118,7 @@ target_accounts = {
 
 gh = project.github
 
-# Keep projen-managed workflows (auto-approve, pull-request-lint) on the same action versions
+# Keep projen-managed workflows (pull-request-lint) on the same action versions
 pin_github_actions(gh)
 
 # Validate the CDK app offline on every pull request (no AWS credentials required)
@@ -144,7 +140,7 @@ YamlFile(
                     {"dependency-name": "aws-cdk"},
                     {"dependency-name": "projen"},
                 ],
-                "labels": ["dependencies", "auto-approve"],
+                "labels": ["dependencies"],
                 "groups": {
                     "default": {
                         "patterns": ["*"],
@@ -155,30 +151,6 @@ YamlFile(
         ],
     },
 )
-
-# Add auto-merge step to the auto-approve workflow
-auto_approve_workflow = project.try_find_object_file(
-    ".github/workflows/auto-approve.yml"
-)
-if auto_approve_workflow:
-    auto_approve_workflow.add_override("jobs.approve.permissions.contents", "write")
-    # Add checkout step before the merge step
-    auto_approve_workflow.add_override(
-        "jobs.approve.steps.1",
-        {
-            "name": "Checkout",
-            "uses": GITHUB_ACTIONS["checkout"],
-            "with": {"persist-credentials": False},
-        },
-    )
-    auto_approve_workflow.add_override(
-        "jobs.approve.steps.2",
-        {
-            "name": "Enable Pull Request Automerge",
-            "run": 'gh pr merge --merge --auto "${{ github.event.pull_request.number }}"',
-            "env": {"GH_TOKEN": "${{ secrets.PROJEN_GITHUB_TOKEN }}"},
-        },
-    )
 
 # Loop through each environment in target_accounts
 for env, account in target_accounts.items():

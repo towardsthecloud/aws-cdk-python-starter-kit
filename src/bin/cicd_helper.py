@@ -1,7 +1,7 @@
 from projen import github
 
 # Pinned GitHub Actions used by every workflow in this repo. `.projenrc.py` registers these
-# with projen's actions provider so projen-managed workflows (auto-approve, pull-request-lint)
+# with projen's actions provider so projen-managed workflows (pull-request-lint)
 # render the same versions as the workflows built here.
 GITHUB_ACTIONS = {
     "checkout": "actions/checkout@v7",
