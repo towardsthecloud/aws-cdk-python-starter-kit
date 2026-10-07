@@ -65,12 +65,12 @@ def cdk_environment_steps(python_version, cdk_cli_version, aws_credentials=None)
 def docker_asset_cache_steps():
     """Restore content-addressed bundling images; skip uploads for apps without Docker assets."""
     cache_path = "${{ runner.temp }}/docker-assets"
-    cache_prefix = "docker-assets-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.docker_cache_epoch.outputs.week }}-"
+    cache_prefix = "docker-assets-v2-${{ runner.os }}-${{ runner.arch }}-${{ steps.docker_cache_epoch.outputs.week }}-"
     restore = [
         {
             "name": "Choose Docker cache refresh week",
             "id": "docker_cache_epoch",
-            "run": 'echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"',
+            "run": 'echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"\necho "source=$(git rev-parse "HEAD^{tree}")" >> "$GITHUB_OUTPUT"',
         },
         {
             "name": "Restore Docker asset images",
@@ -78,8 +78,7 @@ def docker_asset_cache_steps():
             "uses": GITHUB_ACTIONS["cache_restore"],
             "with": {
                 "path": cache_path,
-                "key": cache_prefix
-                + "${{ hashFiles('uv.lock', 'src/**', 'tests/**') }}",
+                "key": cache_prefix + "${{ steps.docker_cache_epoch.outputs.source }}",
                 "restore-keys": cache_prefix,
             },
         },
@@ -138,7 +137,7 @@ def cdk_validate_workflow(gh, python_version, cdk_cli_version, environments):
                             "id": f"validate_{env}",
                             "name": f"Validate {env} offline",
                             "background": True,
-                            "run": f"uv run projen {env}:validate --no-online --output cdk.out/{env}",
+                            "run": f'uv run projen {env}:validate --no-online --output "${{{{ runner.temp }}}}/cdk-assemblies/{env}"',
                         }
                         for env in environments
                     ],
