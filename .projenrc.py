@@ -122,7 +122,28 @@ gh = project.github
 pin_github_actions(gh)
 
 # Validate the CDK app offline on every pull request (no AWS credentials required)
-cdk_validate_workflow(gh, python_version, cdk_cli_version)
+cdk_validate_workflow(
+    gh,
+    python_version,
+    cdk_cli_version,
+    [env for env, account in target_accounts.items() if account],
+)
+
+# Temporary until actionlint supports background/wait steps (rhysd/actionlint#693).
+YamlFile(
+    project,
+    ".github/actionlint.yaml",
+    obj={
+        "paths": {
+            ".github/workflows/{cdk-validate,cdk-deploy-*}.yml": {
+                "ignore": [
+                    '^step must run script with "run" section or run action with "uses" section$',
+                    r'^unexpected key "background" for step to (run shell command|execute action)\. expected one of .+$',
+                ],
+            },
+        },
+    },
+)
 
 # Add Dependabot configuration for uv
 YamlFile(

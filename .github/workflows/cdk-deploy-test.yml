@@ -28,18 +28,23 @@ jobs:
       - name: Setup uv
         id: setup_uv
         uses: astral-sh/setup-uv@v10.0.1
-      - name: Install dependencies
-        id: install_dependencies
-        run: uv sync
-      - name: Install cdk cli
-        id: install_cdk_cli
-        run: npm install -g aws-cdk@2.1139.0
       - name: Configure AWS credentials
         id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::123456789012:role/GitHubDeployRole
           aws-region: us-east-1
+        background: true
+      - name: Install dependencies
+        id: install_dependencies
+        run: uv sync --frozen
+      - name: Install cdk cli
+        id: install_cdk_cli
+        run: npm install -g aws-cdk@2.1139.0
+      - name: Wait for AWS authentication
+        id: wait_for_aws_authentication
+        wait:
+          - configure_aws_credentials
       - name: Validate CDK for the TEST environment
         id: validate_cdk_for_the_test_environment
         run: uv run projen test:validate
