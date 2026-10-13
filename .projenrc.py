@@ -11,7 +11,6 @@ from projen.awscdk import AwsCdkPythonApp
 from src.bin.cicd_helper import (
     cdk_validate_workflow,
     github_cicd,
-    pin_github_actions,
 )
 from src.bin.env_helper import CDK_VALIDATE_COMMAND, cdk_action_task
 
@@ -60,24 +59,7 @@ project = AwsCdkPythonApp(
             "requires_python": python_requires,
         },
     },
-    github_options={
-        "pull_request_lint_options": {
-            "semantic_title_options": {
-                "types": [
-                    "feat",
-                    "fix",
-                    "chore",
-                    "refactor",
-                    "perf",
-                    "docs",
-                    "style",
-                    "test",
-                    "build",
-                    "ci",
-                ],
-            },
-        },
-    },
+    github_options={"pull_request_lint": False},
     git_ignore_options={
         "ignore_patterns": [
             "__pycache__",
@@ -117,9 +99,6 @@ target_accounts = {
 }
 
 gh = project.github
-
-# Keep projen-managed workflows (pull-request-lint) on the same action versions
-pin_github_actions(gh)
 
 # Validate the CDK app offline on every pull request (no AWS credentials required)
 cdk_validate_workflow(
