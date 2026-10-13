@@ -1,23 +1,14 @@
 from projen import github
 
-# Pinned GitHub Actions used by every workflow in this repo. `.projenrc.py` registers these
-# with projen's actions provider so projen-managed workflows (pull-request-lint)
-# render the same versions as the workflows built here.
+# Pinned GitHub Actions used by every workflow in this repo.
 GITHUB_ACTIONS = {
     "checkout": "actions/checkout@v7",
     "cache_restore": "actions/cache/restore@v6",
     "cache_save": "actions/cache/save@v6",
     "configure_aws_credentials": "aws-actions/configure-aws-credentials@v6",
-    "semantic_pull_request": "amannn/action-semantic-pull-request@v6",
     "setup_python": "actions/setup-python@v7",
     "setup_uv": "astral-sh/setup-uv@v10.0.1",  # setup-uv publishes no floating v10 tag
 }
-
-
-def pin_github_actions(gh):
-    """Register GITHUB_ACTIONS with projen's actions provider so every workflow uses the same versions."""
-    for action in GITHUB_ACTIONS.values():
-        gh.actions.set(action.split("@")[0], action)
 
 
 def cdk_environment_steps(python_version, cdk_cli_version, aws_credentials=None):
